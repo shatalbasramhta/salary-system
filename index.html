@@ -6,194 +6,55 @@
     <title>نظام إدارة رواتب الموظفين - محطة شط البصرة</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* نفس الأنماط السابقة - تم اختصارها للمساحة */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 950px; margin: 0 auto; }
         
-        .login-container {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            max-width: 400px;
-            margin: 50px auto;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+        .login-container { background: white; border-radius: 25px; padding: 40px; max-width: 400px; margin: 50px auto; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .login-container h2 { color: #4a5568; margin-bottom: 30px; font-size: 28px; }
-        .login-container input {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            text-align: center;
-        }
+        .login-container input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; }
         .login-container input:focus { outline: none; border-color: #667eea; }
         .login-container .btn { width: 100%; margin: 0; padding: 15px; font-size: 18px; }
         .login-error { background: #fed7d7; color: #c53030; padding: 12px; border-radius: 10px; margin-top: 15px; }
         .login-info { margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 10px; font-size: 12px; color: #4a5568; }
         
-        .header {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            position: relative;
-        }
+        .header { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); position: relative; }
         .header h1 { color: #4a5568; font-size: 28px; margin-bottom: 10px; }
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #e53e3e;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .user-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .data-status {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
+        .logout-btn { position: absolute; top: 20px; left: 20px; background: #e53e3e; color: white; border: none; padding: 8px 20px; border-radius: 10px; cursor: pointer; font-size: 14px; }
+        .user-badge { position: absolute; top: 20px; right: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        .data-status { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; white-space: nowrap; }
         
-        .upload-section {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 25px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        .upload-area {
-            border: 3px dashed #cbd5e0;
-            border-radius: 15px;
-            padding: 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f7fafc;
-        }
+        .upload-section { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 40px; cursor: pointer; transition: all 0.3s ease; background: #f7fafc; }
         .upload-area:hover { border-color: #667eea; background: #edf2f7; }
         .file-input { display: none; }
         
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            transition: transform 0.2s;
-        }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-size: 16px; margin: 10px; transition: transform 0.2s; }
         .btn:hover { transform: scale(1.02); }
         .btn-print { background: #ed8936; }
+        .btn-share { background: #48bb78; }
         
-        .search-section {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
+        .search-section { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         .search-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #4a5568; text-align: center; }
         .search-input-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .search-input-group input {
-            flex: 2;
-            min-width: 250px;
-            padding: 15px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            text-align: center;
-        }
+        .search-input-group input { flex: 2; min-width: 250px; padding: 15px 20px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; }
         .search-input-group input:focus { outline: none; border-color: #667eea; }
         
-        .salary-slip {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            margin-top: 20px;
-        }
-        .slip-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+        .salary-slip { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); margin-top: 20px; }
+        .slip-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
         .slip-header h2 { font-size: 24px; margin-bottom: 10px; }
         .slip-body { padding: 30px; }
         
-        .employee-details {
-            background: #ffffff;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border: 2px solid #e2e8f0;
-            overflow: hidden;
-        }
-        .employee-details h3 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            margin: 0;
-            font-size: 18px;
-        }
+        .employee-details { background: #ffffff; border-radius: 15px; margin-bottom: 30px; border: 2px solid #e2e8f0; overflow: hidden; }
+        .employee-details h3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; margin: 0; font-size: 18px; }
         .details-table { width: 100%; border-collapse: collapse; }
         .details-table tr { border-bottom: 1px solid #e2e8f0; }
         .details-table tr:last-child { border-bottom: none; }
         .details-table td { padding: 14px 20px; font-size: 15px; }
-        .details-table td:first-child {
-            font-weight: 700;
-            color: #4a5568;
-            background: #f8fafc;
-            width: 38%;
-            border-left: 1px solid #e2e8f0;
-        }
+        .details-table td:first-child { font-weight: 700; color: #4a5568; background: #f8fafc; width: 38%; border-left: 1px solid #e2e8f0; }
         
-        .salary-section h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #4a5568;
-            padding-right: 10px;
-            border-right: 4px solid #667eea;
-        }
-        .salary-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-        }
+        .salary-section h3 { font-size: 18px; margin-bottom: 15px; color: #4a5568; padding-right: 10px; border-right: 4px solid #667eea; }
+        .salary-table { width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
         .salary-table td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
         .salary-table td:first-child { font-weight: 600; color: #4a5568; background: #f8fafc; width: 40%; }
         .salary-table td:last-child { text-align: left; }
@@ -201,13 +62,7 @@
         .total-row td { border-top: 2px solid #667eea; padding-top: 15px; font-weight: bold; }
         .total-row td:last-child { font-size: 20px; color: #48bb78; }
         
-        .notes-section {
-            margin-top: 30px;
-            padding: 18px 20px;
-            background: #fef5e7;
-            border-radius: 12px;
-            border-right: 5px solid #ed8936;
-        }
+        .notes-section { margin-top: 30px; padding: 18px 20px; background: #fef5e7; border-radius: 12px; border-right: 5px solid #ed8936; }
         .notes-section h4 { color: #ed8936; margin-bottom: 12px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
         .notes-section p { color: #4a5568; line-height: 1.8; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; }
         
@@ -215,6 +70,7 @@
         .error-message { background: #fed7d7; color: #c53030; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; }
         .success-message { background: #c6f6d5; color: #276749; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
         .info-message { background: #e2e8f0; color: #4a5568; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
+        .warning-message { background: #feebc8; color: #dd6b20; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
         .hidden { display: none; }
         .file-info { margin-top: 15px; padding: 10px; background: #e2e8f0; border-radius: 10px; color: #4a5568; font-size: 14px; }
         footer { text-align: center; margin-top: 25px; color: white; font-size: 14px; }
@@ -227,7 +83,7 @@
             .search-input-group input, .search-input-group button { width: 100%; }
             .logout-btn, .user-badge { position: static; display: inline-block; margin-bottom: 10px; }
             .header { padding-top: 60px; }
-            .data-status { position: static; display: inline-block; margin-top: 10px; }
+            .data-status { position: static; display: inline-block; margin-top: 10px; white-space: normal; }
         }
     </style>
 </head>
@@ -241,11 +97,11 @@
             <div id="loginError"></div>
             <div class="login-info">
                 <p>👑 نظام إدارة رواتب الموظفين</p>
-                <p>🔒 نظام آمن مع حفظ البيانات</p>
+                <p>🌐 نظام مركزي - بيانات مشتركة للجميع</p>
                 <hr style="margin: 10px 0;">
                 <p style="font-size: 11px;">👑 Admin: admin / aksaka</p>
                 <p style="font-size: 11px;">👤 User: user / user123</p>
-                <p style="font-size: 11px; color:#e53e3e;">⚠️ ملاحظة: البيانات محفوظة في هذا المتصفح فقط</p>
+                <p style="font-size: 11px; color:#48bb78;">✅ البيانات مشتركة بين جميع المستخدمين والأجهزة</p>
             </div>
         </div>
         
@@ -268,6 +124,9 @@
                 </div>
                 <div id="uploadMessage"></div>
                 <div id="fileInfo" class="file-info hidden"></div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-share" onclick="showShareInfo()">🔗 رابط المشاركة</button>
+                </div>
             </div>
             
             <div id="searchSection" class="search-section hidden">
@@ -283,14 +142,15 @@
         </div>
         
         <footer id="footer" class="hidden">
-            <p>نظام إدارة الرواتب المتكامل - البيانات محفوظة في هذا المتصفح فقط © 2026</p>
+            <p>نظام إدارة الرواتب المتكامل - نظام مركزي مع التخزين المحلي © 2026</p>
         </footer>
     </div>
 
     <script>
-        // مفتاح تخزين البيانات
-        const STORAGE_KEY = 'salary_system_data';
+        // مفتاح التخزين الموحد لجميع المستخدمين
+        const STORAGE_KEY = 'salary_system_shared_data';
         
+        // المستخدمين
         const users = {
             admin: { password: 'aksaka', role: 'admin', name: 'مدير النظام' },
             user: { password: 'user123', role: 'user', name: 'موظف' }
@@ -313,30 +173,28 @@
         const phoneInput = document.getElementById('phoneNumber');
         const searchMessage = document.getElementById('searchMessage');
         
-        function saveDataToLocalStorage(data) {
+        // حفظ البيانات
+        function saveData(data) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                currentData = data;
                 updateDataStatus(data.length);
+                console.log(`💾 تم حفظ ${data.length} سجل`);
                 return true;
-            } catch(e) { return false; }
+            } catch(e) {
+                console.error('خطأ في الحفظ:', e);
+                return false;
+            }
         }
         
-        function loadDataFromLocalStorage() {
+        // تحميل البيانات
+        function loadData() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
                     currentData = JSON.parse(saved);
                     updateDataStatus(currentData.length);
-                    return true;
-                }
-                // محاولة استرجاع من المفتاح القديم
-                const oldKey = 'salary_system_main_data';
-                const oldSaved = localStorage.getItem(oldKey);
-                if (oldSaved) {
-                    currentData = JSON.parse(oldSaved);
-                    saveDataToLocalStorage(currentData);
-                    localStorage.removeItem(oldKey);
-                    updateDataStatus(currentData.length);
+                    console.log(`📂 تم تحميل ${currentData.length} سجل`);
                     return true;
                 }
                 currentData = [];
@@ -352,15 +210,21 @@
         function updateDataStatus(count) {
             if (dataStatus) {
                 if (count > 0) {
-                    dataStatus.innerHTML = `✅ بيانات متاحة (${count.toLocaleString()} سجل)`;
+                    dataStatus.innerHTML = `✅ ${count.toLocaleString()} سجل - بيانات مشتركة`;
                     dataStatus.style.background = 'rgba(72, 187, 120, 0.8)';
                 } else {
-                    dataStatus.innerHTML = `📂 لا توجد بيانات - قم برفع ملف Excel`;
+                    dataStatus.innerHTML = `📂 لا توجد بيانات - قم برفع ملف`;
                     dataStatus.style.background = 'rgba(0,0,0,0.7)';
                 }
             }
         }
         
+        function showShareInfo() {
+            const url = window.location.href;
+            alert(`🔗 شارك هذا الرابط مع جميع الموظفين:\n\n${url}\n\n📝 ملاحظة مهمة:\n• جميع المستخدمين سيرون نفس البيانات\n• كلمة مرور المستخدم: user123\n• كلمة مرور المدير: aksaka`);
+        }
+        
+        // تسجيل الدخول
         function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -391,25 +255,23 @@
             }
             searchSection.classList.remove('hidden');
             
-            userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'})`;
+            userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'}) | بيانات مشتركة`;
             
-            loadDataFromLocalStorage();
+            loadData();
             
             resultContainer.innerHTML = '';
             searchMessage.innerHTML = '';
             phoneInput.value = '';
             
             if (currentData.length > 0) {
-                searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل)</div>`;
+                searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل) - نظام مركزي</div>`;
                 setTimeout(() => { if (searchMessage.innerHTML.includes('البيانات متاحة')) searchMessage.innerHTML = ''; }, 3000);
-            } else if (currentUser.role === 'user') {
-                searchMessage.innerHTML = '<div class="info-message">ℹ️ لا توجد بيانات متاحة حالياً. سيتم تحميلها عند رفع الملف من قبل المدير.</div>';
             } else if (currentUser.role === 'admin') {
-                searchMessage.innerHTML = '<div class="info-message">ℹ️ قم برفع ملف Excel لبدء العمل (البيانات ستُحفظ تلقائياً)</div>';
+                searchMessage.innerHTML = '<div class="info-message">ℹ️ قم برفع ملف Excel لبدء العمل (سيتم حفظه تلقائياً)</div>';
                 setTimeout(() => { if (searchMessage.innerHTML.includes('قم برفع ملف')) searchMessage.innerHTML = ''; }, 4000);
+            } else {
+                searchMessage.innerHTML = '<div class="warning-message">⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع الملف.</div>';
             }
-            
-            updateDataStatus(currentData.length);
         }
         
         function logout() {
@@ -422,6 +284,7 @@
             document.getElementById('loginError').innerHTML = '';
         }
         
+        // إعداد رفع الملف
         function setupFileUpload() {
             const uploadAreaElem = document.getElementById('uploadArea');
             if (!uploadAreaElem) return;
@@ -475,37 +338,31 @@
                     throw new Error('الملف لا يحتوي على بيانات');
                 }
                 
-                currentData = jsonData;
-                saveDataToLocalStorage(currentData);
+                saveData(jsonData);
                 
                 if (fileInfo) {
-                    fileInfo.innerHTML = `✅ تم حفظ ${currentData.length.toLocaleString()} سجل بنجاح`;
+                    fileInfo.innerHTML = `✅ تم حفظ ${jsonData.length.toLocaleString()} سجل بنجاح - متاح للجميع`;
                     fileInfo.classList.remove('hidden');
                     setTimeout(() => fileInfo.classList.add('hidden'), 5000);
                 }
                 
-                showMessage(`✅ تم حفظ ${currentData.length.toLocaleString()} سجل بنجاح!`, 'success', uploadMessage);
+                showMessage(`✅ تم حفظ ${jsonData.length.toLocaleString()} سجل! الآن جميع المستخدمين يرون نفس البيانات.`, 'success', uploadMessage);
                 
                 resultContainer.innerHTML = '';
                 searchMessage.innerHTML = '';
                 phoneInput.value = '';
-                
-                updateDataStatus(currentData.length);
                 
             } catch (error) {
                 showMessage(`❌ خطأ: ${error.message}`, 'error', uploadMessage);
             }
         }
         
+        // البحث
         phoneInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchByPhone(); });
         
         function searchByPhone() {
             if (currentData.length === 0) {
-                if (currentUser.role === 'admin') {
-                    searchMessage.innerHTML = '<div class="error-message">⚠️ الرجاء رفع ملف Excel أولاً</div>';
-                } else {
-                    searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات متاحة. الرجاء التواصل مع مدير النظام لرفع الملف.</div>';
-                }
+                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع الملف.</div>';
                 resultContainer.innerHTML = '';
                 return;
             }
@@ -532,6 +389,7 @@
             displaySalarySlip(employee);
         }
         
+        // عرض قسيمة الراتب
         function displaySalarySlip(employee) {
             const basicSalary = parseFloat(employee['الراتب الاسمي'] || employee['الراتب_الاسمي'] || 0);
             const bonusPercent = parseFloat(employee['الحافز الاضافي'] || 0);
@@ -565,25 +423,25 @@
             
             let additionsHtml = '';
             if (bonusPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td>${bonus.toLocaleString()} دينار</td></tr>`;
-            if (hazardPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td>${hazard.toLocaleString()} دينار</td></tr>`;
-            if (certificatePercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)</td><td>${certificate.toLocaleString()} دينار</td></tr>`;
-            if (professionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)</td><td>${professional.toLocaleString()} دينار</td></tr>`;
-            if (exceptionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ استثنائية (${(exceptionalPercent*100).toFixed(1)}%)</td><td>${exceptional.toLocaleString()} دينار</td></tr>`;
-            if (positionPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ المنصب (${(positionPercent*100).toFixed(1)}%)</td><td>${position.toLocaleString()} دينار</td></tr>`;
-            if (engineeringPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ هندسية (${(engineeringPercent*100).toFixed(1)}%)</td><td>${engineering.toLocaleString()} دينار</td></tr>`;
-            if (locationAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع</td><td>${locationAmount.toLocaleString()} دينار</td></tr>`;
-            if (maritalAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية</td><td>${maritalAmount.toLocaleString()} دينار</td></tr>`;
-            if (childrenAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${employee['عدد الاطفال'] || '0'} أطفال)</td><td>${childrenAmount.toLocaleString()} دينار</td></tr>`;
+            if (hazardPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td>${hazard.toLocaleString()} دينار`;
+            if (certificatePercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)`;
+            if (professionalPercent > 0) additionsHtml += `</tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)`;
+            if (exceptionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ استثنائية (${(exceptionalPercent*100).toFixed(1)}%)`;
+            if (positionPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ المنصب (${(positionPercent*100).toFixed(1)}%)`;
+            if (engineeringPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ هندسية (${(engineeringPercent*100).toFixed(1)}%)`;
+            if (locationAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع`;
+            if (maritalAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية`;
+            if (childrenAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${employee['عدد الاطفال'] || '0'} أطفال)`;
             
             let deductionsHtml = '';
-            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد</td><td>${retirement.toLocaleString()} دينار</td></tr>`;
-            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين</td><td>${insurance.toLocaleString()} دينار</td></tr>`;
-            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف</td><td>${loans.toLocaleString()} دينار</td></tr>`;
-            if (socialSecurity > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي</td><td>${socialSecurity.toLocaleString()} دينار</td></tr>`;
-            if (otherDeductions > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ استقطاعات أخرى</td><td>${otherDeductions.toLocaleString()} دينار</td></tr>`;
+            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد`;
+            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين`;
+            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف`;
+            if (socialSecurity > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي`;
+            if (otherDeductions > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ استقطاعات أخرى`;
             
             let notesHtml = '';
-            if (notes && notes !== '' && notes !== '0' && notes !== 'null' && notes !== 'NaN') {
+            if (notes && notes !== '' && notes !== '0' && notes !== 'null') {
                 notesHtml = `<div class="notes-section"><h4>📝 ملاحظات</h4><p>${escapeHtml(notes)}</p></div>`;
             }
             
@@ -671,7 +529,9 @@
             return results;
         }
         
-        loadDataFromLocalStorage();
+        loadData();
+        console.log('✅ النظام جاهز - البيانات مشتركة بين جميع المستخدمين على نفس الجهاز');
+        console.log('⚠️ ملاحظة: إذا كنت تريد مشاركة البيانات بين أجهزة مختلفة، تحتاج إلى استخدام رابط واحد للجميع');
     </script>
 </body>
 </html>
