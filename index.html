@@ -33,7 +33,7 @@
         .btn:hover { transform: scale(1.02); }
         .btn-print { background: #ed8936; }
         .btn-primary { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
-        .btn-warning { background: #ed8936; }
+        .btn-share { background: #4299e1; }
         
         .search-section { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         .search-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #4a5568; text-align: center; }
@@ -72,9 +72,10 @@
         .success-message { background: #c6f6d5; color: #276749; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
         .info-message { background: #e2e8f0; color: #4a5568; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
         .warning-message { background: #feebc8; color: #dd6b20; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
+        .share-link-container { background: #edf2f7; padding: 15px; border-radius: 12px; margin-top: 20px; text-align: center; word-break: break-all; }
+        .share-link-container input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 12px; margin-top: 10px; }
         .hidden { display: none; }
         .file-info { margin-top: 15px; padding: 10px; background: #e2e8f0; border-radius: 10px; color: #4a5568; font-size: 14px; }
-        .demo-data-info { background: #ebf8ff; border: 1px solid #90cdf4; border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 13px; color: #2b6cb0; }
         footer { text-align: center; margin-top: 25px; color: white; font-size: 14px; }
         
         @media print {
@@ -92,18 +93,17 @@
 <body>
     <div class="container">
         <div id="loginContainer" class="login-container">
-            <h2>🔐 تسجيل الدخول</h2>
+            <h2>🔐 نظام إدارة رواتب الموظفين</h2>
+            <h3 style="color:#667eea; margin-bottom:20px;">محطة شط البصرة</h3>
             <input type="text" id="username" placeholder="اسم المستخدم" autocomplete="off">
             <input type="password" id="password" placeholder="كلمة المرور">
             <button class="btn" onclick="login()">دخول</button>
             <div id="loginError"></div>
             <div class="login-info">
-                <p>👑 نظام إدارة رواتب الموظفين - محطة شط البصرة</p>
-                <p>🌐 يعمل على GitHub Pages مع بيانات افتراضية مدمجة</p>
+                <p>👑 Admin: admin / 777777</p>
+                <p>👤 User: user / user123</p>
                 <hr style="margin: 10px 0;">
-                <p style="font-size: 11px;">👑 Admin: admin / aksaka</p>
-                <p style="font-size: 11px;">👤 User: user / user123</p>
-                <p style="font-size: 11px; color:#48bb78;">✅ يحتوي النظام على بيانات نموذجية للموظفين</p>
+                <p style="color:#48bb78; font-size:11px;">✅ البيانات مضمنة في الرابط - تعمل على جميع الأجهزة</p>
             </div>
         </div>
         
@@ -119,7 +119,7 @@
             <div id="uploadSection" class="upload-section hidden">
                 <div class="upload-area" id="uploadArea">
                     <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
-                    <p>اسحب وأفلت ملف Excel أو CSV هنا</p>
+                    <p>اسحب وأفلت ملف Excel أو CSV هنا لتحديث البيانات</p>
                     <p style="font-size: 12px; color: #a0aec0; margin-top: 10px;">أو</p>
                     <button class="btn" onclick="document.getElementById('fileInput').click()">اختر ملف</button>
                     <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv,.xlsm">
@@ -127,8 +127,11 @@
                 <div id="uploadMessage"></div>
                 <div id="fileInfo" class="file-info hidden"></div>
                 <button class="btn btn-primary" onclick="resetToDemoData()">📋 استعادة البيانات النموذجية</button>
-                <div class="demo-data-info">
-                    💡 ملاحظة: البيانات مخزنة في متصفحك فقط. يمكنك رفع ملف Excel خاص بك، أو استخدام البيانات النموذجية المدمجة.
+                <button class="btn btn-share" onclick="generateShareableLink()">🔗 إنشاء رابط للمشاركة</button>
+                <div id="shareLinkContainer" class="share-link-container hidden">
+                    <p>📎 الرابط المضمن بالبيانات (انسخه وارسله لأي شخص):</p>
+                    <input type="text" id="shareLinkInput" readonly onclick="this.select()">
+                    <p style="font-size:11px; margin-top:10px;">⚠️ أي شخص يفتح هذا الرابط سيرى نفس البيانات!</p>
                 </div>
             </div>
             
@@ -150,143 +153,12 @@
     </div>
 
     <script>
-        // مفتاح التخزين
-        const STORAGE_KEY = 'salary_system_shared_data';
-        
-        // بيانات نموذجية مدمجة
+        // البيانات النموذجية المدمجة
         const DEMO_DATA = [
-            {
-                "رقم الهاتف": "07712345678",
-                "Beneficiary Name": "أحمد محمد حسن",
-                "الاسم": "أحمد محمد حسن",
-                "الرقم الوظيفي": "1001",
-                "القسم": "المالية",
-                "العنوان الوظيفي": "محاسب أول",
-                "الدرجة": "ثالثة",
-                "المرحلة": "ثاني",
-                "حالة الموظف": "متزوج",
-                "عدد الاطفال": "3",
-                "المصرف": "الرافدين",
-                "حالة المنتسب": "دوام كامل",
-                "الراتب الاسمي": "850000",
-                "الحافز الاضافي": "0.15",
-                "خطورة": "0.10",
-                "الشهادة": "0.12",
-                "مهنية": "0.08",
-                "استثنائية": "0.05",
-                "المنصب": "0.10",
-                "هندسية": "0",
-                "الموقع": "75000",
-                "زوجية": "50000",
-                "اطفال": "30000",
-                "التقاعد": "85000",
-                "التأمين": "25000",
-                "سلف": "0",
-                "الضمان الاجتماعي": "15000",
-                "إستقطاع": "0",
-                "مجموع الاستقطاع": "125000",
-                "شهر الراتب": "5/2026",
-                "الملاحظات": "موظف مجتهد"
-            },
-            {
-                "رقم الهاتف": "07723456789",
-                "Beneficiary Name": "سارة علي محمود",
-                "الاسم": "سارة علي محمود",
-                "الرقم الوظيفي": "1002",
-                "القسم": "الموارد البشرية",
-                "العنوان الوظيفي": "مديرة قسم",
-                "الدرجة": "ثانية",
-                "المرحلة": "ثالث",
-                "حالة الموظف": "متزوجة",
-                "عدد الاطفال": "2",
-                "المصرف": "العراقي",
-                "حالة المنتسب": "دوام كامل",
-                "الراتب الاسمي": "1200000",
-                "الحافز الاضافي": "0.20",
-                "خطورة": "0.05",
-                "الشهادة": "0.15",
-                "مهنية": "0.10",
-                "استثنائية": "0.08",
-                "المنصب": "0.20",
-                "هندسية": "0",
-                "الموقع": "100000",
-                "زوجية": "50000",
-                "اطفال": "20000",
-                "التقاعد": "120000",
-                "التأمين": "30000",
-                "سلف": "100000",
-                "الضمان الاجتماعي": "20000",
-                "إستقطاع": "0",
-                "مجموع الاستقطاع": "270000",
-                "شهر الراتب": "5/2026",
-                "الملاحظات": "موظفة متميزة"
-            },
-            {
-                "رقم الهاتف": "07734567890",
-                "Beneficiary Name": "عمر خالد ابراهيم",
-                "الاسم": "عمر خالد ابراهيم",
-                "الرقم الوظيفي": "1003",
-                "القسم": "الهندسة",
-                "العنوان الوظيفي": "مهندس ميكانيك",
-                "الدرجة": "ثالثة",
-                "المرحلة": "أول",
-                "حالة الموظف": "أعزب",
-                "عدد الاطفال": "0",
-                "المصرف": "الرافدين",
-                "حالة المنتسب": "دوام كامل",
-                "الراتب الاسمي": "950000",
-                "الحافز الاضافي": "0.12",
-                "خطورة": "0.15",
-                "الشهادة": "0.10",
-                "مهنية": "0.12",
-                "استثنائية": "0.05",
-                "المنصب": "0.08",
-                "هندسية": "0.15",
-                "الموقع": "80000",
-                "زوجية": "0",
-                "اطفال": "0",
-                "التقاعد": "95000",
-                "التأمين": "28000",
-                "سلف": "50000",
-                "الضمان الاجتماعي": "18000",
-                "إستقطاع": "0",
-                "مجموع الاستقطاع": "191000",
-                "شهر الراتب": "5/2026",
-                "الملاحظات": ""
-            },
-            {
-                "رقم الهاتف": "07745678901",
-                "Beneficiary Name": "ليلى عبد الرحمن",
-                "الاسم": "ليلى عبد الرحمن",
-                "الرقم الوظيفي": "1004",
-                "القسم": "التسويق",
-                "العنوان الوظيفي": "مسؤولة تسويق",
-                "الدرجة": "رابعة",
-                "المرحلة": "ثاني",
-                "حالة الموظف": "متزوجة",
-                "عدد الاطفال": "1",
-                "المصرف": "العراقي",
-                "حالة المنتسب": "دوام كامل",
-                "الراتب الاسمي": "750000",
-                "الحافز الاضافي": "0.10",
-                "خطورة": "0",
-                "الشهادة": "0.10",
-                "مهنية": "0.08",
-                "استثنائية": "0.05",
-                "المنصب": "0.06",
-                "هندسية": "0",
-                "الموقع": "60000",
-                "زوجية": "50000",
-                "اطفال": "15000",
-                "التقاعد": "75000",
-                "التأمين": "22000",
-                "سلف": "0",
-                "الضمان الاجتماعي": "12000",
-                "إستقطاع": "0",
-                "مجموع الاستقطاع": "109000",
-                "شهر الراتب": "5/2026",
-                "الملاحظات": "موظفة جديدة - فترة تجربة"
-            }
+            {"رقم الهاتف":"07712345678","Beneficiary Name":"أحمد محمد حسن","الاسم":"أحمد محمد حسن","الرقم الوظيفي":"1001","القسم":"المالية","العنوان الوظيفي":"محاسب أول","الدرجة":"ثالثة","المرحلة":"ثاني","حالة الموظف":"متزوج","عدد الاطفال":"3","المصرف":"الرافدين","حالة المنتسب":"دوام كامل","الراتب الاسمي":"850000","الحافز الاضافي":"0.15","خطورة":"0.10","الشهادة":"0.12","مهنية":"0.08","استثنائية":"0.05","المنصب":"0.10","هندسية":"0","الموقع":"75000","زوجية":"50000","اطفال":"30000","التقاعد":"85000","التأمين":"25000","سلف":"0","الضمان الاجتماعي":"15000","إستقطاع":"0","مجموع الاستقطاع":"125000","شهر الراتب":"5/2026","الملاحظات":"موظف مجتهد"},
+            {"رقم الهاتف":"07723456789","Beneficiary Name":"سارة علي محمود","الاسم":"سارة علي محمود","الرقم الوظيفي":"1002","القسم":"الموارد البشرية","العنوان الوظيفي":"مديرة قسم","الدرجة":"ثانية","المرحلة":"ثالث","حالة الموظف":"متزوجة","عدد الاطفال":"2","المصرف":"العراقي","حالة المنتسب":"دوام كامل","الراتب الاسمي":"1200000","الحافز الاضافي":"0.20","خطورة":"0.05","الشهادة":"0.15","مهنية":"0.10","استثنائية":"0.08","المنصب":"0.20","هندسية":"0","الموقع":"100000","زوجية":"50000","اطفال":"20000","التقاعد":"120000","التأمين":"30000","سلف":"100000","الضمان الاجتماعي":"20000","إستقطاع":"0","مجموع الاستقطاع":"270000","شهر الراتب":"5/2026","الملاحظات":"موظفة متميزة"},
+            {"رقم الهاتف":"07734567890","Beneficiary Name":"عمر خالد ابراهيم","الاسم":"عمر خالد ابراهيم","الرقم الوظيفي":"1003","القسم":"الهندسة","العنوان الوظيفي":"مهندس ميكانيك","الدرجة":"ثالثة","المرحلة":"أول","حالة الموظف":"أعزب","عدد الاطفال":"0","المصرف":"الرافدين","حالة المنتسب":"دوام كامل","الراتب الاسمي":"950000","الحافز الاضافي":"0.12","خطورة":"0.15","الشهادة":"0.10","مهنية":"0.12","استثنائية":"0.05","المنصب":"0.08","هندسية":"0.15","الموقع":"80000","زوجية":"0","اطفال":"0","التقاعد":"95000","التأمين":"28000","سلف":"50000","الضمان الاجتماعي":"18000","إستقطاع":"0","مجموع الاستقطاع":"191000","شهر الراتب":"5/2026","الملاحظات":""},
+            {"رقم الهاتف":"07745678901","Beneficiary Name":"ليلى عبد الرحمن","الاسم":"ليلى عبد الرحمن","الرقم الوظيفي":"1004","القسم":"التسويق","العنوان الوظيفي":"مسؤولة تسويق","الدرجة":"رابعة","المرحلة":"ثاني","حالة الموظف":"متزوجة","عدد الاطفال":"1","المصرف":"العراقي","حالة المنتسب":"دوام كامل","الراتب الاسمي":"750000","الحافز الاضافي":"0.10","خطورة":"0","الشهادة":"0.10","مهنية":"0.08","استثنائية":"0.05","المنصب":"0.06","هندسية":"0","الموقع":"60000","زوجية":"50000","اطفال":"15000","التقاعد":"75000","التأمين":"22000","سلف":"0","الضمان الاجتماعي":"12000","إستقطاع":"0","مجموع الاستقطاع":"109000","شهر الراتب":"5/2026","الملاحظات":"موظفة جديدة - فترة تجربة"}
         ];
         
         // المستخدمين
@@ -311,43 +183,97 @@
         const resultContainer = document.getElementById('resultContainer');
         const phoneInput = document.getElementById('phoneNumber');
         const searchMessage = document.getElementById('searchMessage');
+        const shareLinkContainer = document.getElementById('shareLinkContainer');
+        const shareLinkInput = document.getElementById('shareLinkInput');
         
-        // حفظ البيانات
-        function saveData(data) {
+        // حفظ البيانات (في localStorage و URL)
+        function saveData(data, updateUrl = true) {
+            currentData = data;
+            updateDataStatus(data.length);
+            
+            // حفظ في localStorage
+            localStorage.setItem('salary_system_data', JSON.stringify(data));
+            
+            // تحديث عنوان URL ليشمل البيانات (مشاركة بين الأجهزة)
+            if (updateUrl) {
+                updateUrlWithData(data);
+            }
+            
+            console.log(`💾 تم حفظ ${data.length} سجل`);
+            return true;
+        }
+        
+        // تحديث الرابط ليشمل البيانات المشفرة
+        function updateUrlWithData(data) {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                currentData = data;
-                updateDataStatus(data.length);
-                console.log(`💾 تم حفظ ${data.length} سجل`);
-                return true;
+                const jsonStr = JSON.stringify(data);
+                // ضغط البيانات باستخدام LZString-like بسيط (Base64)
+                const compressed = btoa(encodeURIComponent(jsonStr));
+                const newUrl = `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+                window.history.replaceState({}, '', newUrl);
             } catch(e) {
-                console.error('خطأ في الحفظ:', e);
-                return false;
+                console.error('خطأ في تحديث الرابط:', e);
             }
         }
         
-        // تحميل البيانات
-        function loadData() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed && parsed.length > 0) {
-                        currentData = parsed;
-                        updateDataStatus(currentData.length);
-                        console.log(`📂 تم تحميل ${currentData.length} سجل من التخزين المحلي`);
+        // تحميل البيانات من الرابط أو localStorage
+        function loadDataFromUrlOrStorage() {
+            // أولاً: حاول قراءة البيانات من رابط URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            
+            if (encodedData) {
+                try {
+                    const jsonStr = decodeURIComponent(atob(encodedData));
+                    const data = JSON.parse(jsonStr);
+                    if (data && data.length > 0) {
+                        currentData = data;
+                        localStorage.setItem('salary_system_data', JSON.stringify(data));
+                        updateDataStatus(data.length);
+                        console.log(`📡 تم تحميل ${data.length} سجل من الرابط`);
                         return true;
                     }
+                } catch(e) {
+                    console.error('خطأ في فك تشفير البيانات من الرابط:', e);
                 }
-                // إذا لم توجد بيانات محفوظة، استخدم البيانات النموذجية
-                console.log('📋 لا توجد بيانات محفوظة، جاري تحميل البيانات النموذجية...');
-                saveData(DEMO_DATA);
-                updateDataStatus(currentData.length);
-                return true;
+            }
+            
+            // ثانياً: حاول من localStorage
+            const saved = localStorage.getItem('salary_system_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data && data.length > 0) {
+                        currentData = data;
+                        updateDataStatus(data.length);
+                        console.log(`💾 تم تحميل ${data.length} سجل من التخزين المحلي`);
+                        return true;
+                    }
+                } catch(e) {}
+            }
+            
+            // أخيراً: استخدم البيانات النموذجية
+            currentData = DEMO_DATA;
+            updateDataStatus(DEMO_DATA.length);
+            console.log(`📋 تم تحميل ${DEMO_DATA.length} سجل نموذجي`);
+            return true;
+        }
+        
+        // إنشاء رابط قابل للمشاركة
+        function generateShareableLink() {
+            try {
+                const jsonStr = JSON.stringify(currentData);
+                const compressed = btoa(encodeURIComponent(jsonStr));
+                const shareUrl = `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+                shareLinkInput.value = shareUrl;
+                shareLinkContainer.classList.remove('hidden');
+                
+                // نسخ تلقائي
+                shareLinkInput.select();
+                document.execCommand('copy');
+                showMessage('✅ تم إنشاء الرابط ونسخه إلى الحافظة!', 'success', uploadMessage);
             } catch(e) {
-                console.error('خطأ في التحميل:', e);
-                saveData(DEMO_DATA);
-                return true;
+                showMessage('❌ خطأ في إنشاء الرابط: البيانات كبيرة جداً', 'error', uploadMessage);
             }
         }
         
@@ -355,11 +281,12 @@
         function resetToDemoData() {
             if (currentUser && currentUser.role === 'admin') {
                 if (confirm('⚠️ هل أنت متأكد؟ سيتم استبدال البيانات الحالية بالبيانات النموذجية.')) {
-                    saveData(DEMO_DATA);
-                    showMessage('✅ تم استعادة البيانات النموذجية بنجاح!', 'success', uploadMessage);
+                    saveData(JSON.parse(JSON.stringify(DEMO_DATA)), true);
+                    showMessage('✅ تم استعادة البيانات النموذجية! يمكنك الآن مشاركة الرابط الجديد.', 'success', uploadMessage);
                     resultContainer.innerHTML = '';
                     searchMessage.innerHTML = '';
                     phoneInput.value = '';
+                    shareLinkContainer.classList.add('hidden');
                 }
             }
         }
@@ -367,7 +294,7 @@
         function updateDataStatus(count) {
             if (dataStatus) {
                 if (count > 0) {
-                    dataStatus.innerHTML = `✅ ${count.toLocaleString()} سجل - بيانات محلية`;
+                    dataStatus.innerHTML = `✅ ${count.toLocaleString()} سجل - بيانات مضمنة بالرابط`;
                     dataStatus.style.background = 'rgba(72, 187, 120, 0.8)';
                 } else {
                     dataStatus.innerHTML = `📂 لا توجد بيانات`;
@@ -409,16 +336,16 @@
             
             userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'})`;
             
-            loadData();
+            // تحميل البيانات
+            loadDataFromUrlOrStorage();
             
             resultContainer.innerHTML = '';
             searchMessage.innerHTML = '';
             phoneInput.value = '';
             
             if (currentData.length > 0) {
-                let demoNote = currentData === DEMO_DATA ? ' (بيانات نموذجية)' : '';
-                searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل)${demoNote}</div>`;
-                setTimeout(() => { if (searchMessage.innerHTML.includes('البيانات متاحة')) searchMessage.innerHTML = ''; }, 3000);
+                searchMessage.innerHTML = `<div class="success-message">✅ النظام جاهز - ${currentData.length.toLocaleString()} موظف مسجل</div>`;
+                setTimeout(() => { if (searchMessage.innerHTML.includes('النظام جاهز')) searchMessage.innerHTML = ''; }, 3000);
             }
         }
         
@@ -486,7 +413,7 @@
                     throw new Error('الملف لا يحتوي على بيانات');
                 }
                 
-                saveData(jsonData);
+                saveData(jsonData, true);
                 
                 if (fileInfo) {
                     fileInfo.innerHTML = `✅ تم حفظ ${jsonData.length.toLocaleString()} سجل بنجاح`;
@@ -494,8 +421,8 @@
                     setTimeout(() => fileInfo.classList.add('hidden'), 5000);
                 }
                 
-                showMessage(`✅ تم حفظ ${jsonData.length.toLocaleString()} سجل!`, 'success', uploadMessage);
-                
+                showMessage(`✅ تم حفظ ${jsonData.length.toLocaleString()} سجل! يمكنك الآن مشاركة الرابط الجديد.`, 'success', uploadMessage);
+                shareLinkContainer.classList.add('hidden');
                 resultContainer.innerHTML = '';
                 searchMessage.innerHTML = '';
                 phoneInput.value = '';
@@ -510,7 +437,7 @@
         
         function searchByPhone() {
             if (currentData.length === 0) {
-                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات. قم برفع ملف Excel أو استخدم البيانات النموذجية.</div>';
+                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات.</div>';
                 resultContainer.innerHTML = '';
                 return;
             }
@@ -522,7 +449,6 @@
                 return;
             }
             
-            // بحث متسامح مع الأرقام
             const employee = currentData.find(row => {
                 const phone = String(row['رقم الهاتف'] || row['phone'] || '');
                 const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -682,9 +608,8 @@
             return results;
         }
         
-        // تحميل البيانات عند بدء التشغيل
-        console.log('✅ النظام جاهز للعمل على GitHub Pages');
-        console.log('📋 يحتوي النظام على بيانات نموذجية يمكن استخدامها فوراً');
+        console.log('✅ النظام جاهز - البيانات مضمنة في الرابط');
+        console.log('💡 تلميح: استخدم زر "إنشاء رابط للمشاركة" لمشاركة البيانات مع أي شخص');
     </script>
 </body>
 </html>
