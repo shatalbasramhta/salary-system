@@ -6,6 +6,7 @@
     <title>نظام إدارة رواتب الموظفين - محطة شط البصرة</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
+        /* نفس الأنماط السابقة - تم اختصارها للمساحة */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -77,11 +78,11 @@
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             color: white;
-            padding: 4px 12px;
+            padding: 5px 15px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 12px;
         }
         
         .upload-section {
@@ -116,7 +117,6 @@
         }
         .btn:hover { transform: scale(1.02); }
         .btn-print { background: #ed8936; }
-        .btn-clear { background: #e53e3e; }
         
         .search-section {
             background: white;
@@ -227,6 +227,7 @@
             .search-input-group input, .search-input-group button { width: 100%; }
             .logout-btn, .user-badge { position: static; display: inline-block; margin-bottom: 10px; }
             .header { padding-top: 60px; }
+            .data-status { position: static; display: inline-block; margin-top: 10px; }
         }
     </style>
 </head>
@@ -240,11 +241,11 @@
             <div id="loginError"></div>
             <div class="login-info">
                 <p>👑 نظام إدارة رواتب الموظفين</p>
-                <p>🔒 نظام آمن مع حفظ البيانات محلياً</p>
+                <p>🔒 نظام آمن مع حفظ البيانات</p>
                 <hr style="margin: 10px 0;">
                 <p style="font-size: 11px;">👑 Admin: admin / aksaka</p>
                 <p style="font-size: 11px;">👤 User: user / user123</p>
-                <p style="font-size: 11px; color:#e53e3e;">⚠️ ملاحظة: البيانات محفوظة على هذا المتصفح فقط</p>
+                <p style="font-size: 11px; color:#e53e3e;">⚠️ ملاحظة: البيانات محفوظة في هذا المتصفح فقط</p>
             </div>
         </div>
         
@@ -252,7 +253,7 @@
             <div class="header">
                 <button class="logout-btn" onclick="logout()">🚪 تسجيل خروج</button>
                 <div class="user-badge" id="userBadge"></div>
-                <div class="data-status" id="dataStatus">📊 لا توجد بيانات</div>
+                <div class="data-status" id="dataStatus">📊 جاري التحميل...</div>
                 <h1>🏭 نظام إدارة رواتب الموظفين</h1>
                 <p>محطة شط البصرة - إدارة الموارد البشرية</p>
             </div>
@@ -267,9 +268,6 @@
                 </div>
                 <div id="uploadMessage"></div>
                 <div id="fileInfo" class="file-info hidden"></div>
-                <div style="margin-top: 10px;">
-                    <button class="btn btn-clear" onclick="clearAllData()">🗑️ مسح جميع البيانات</button>
-                </div>
             </div>
             
             <div id="searchSection" class="search-section hidden">
@@ -291,9 +289,8 @@
 
     <script>
         // مفتاح تخزين البيانات
-        const STORAGE_KEY = 'salary_system_main_data';
+        const STORAGE_KEY = 'salary_system_data';
         
-        // المستخدمين
         const users = {
             admin: { password: 'aksaka', role: 'admin', name: 'مدير النظام' },
             user: { password: 'user123', role: 'user', name: 'موظف' }
@@ -316,26 +313,29 @@
         const phoneInput = document.getElementById('phoneNumber');
         const searchMessage = document.getElementById('searchMessage');
         
-        // حفظ البيانات في LocalStorage
         function saveDataToLocalStorage(data) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                console.log(`💾 تم حفظ ${data.length} سجل`);
                 updateDataStatus(data.length);
                 return true;
-            } catch(e) {
-                console.error('خطأ في حفظ البيانات:', e);
-                return false;
-            }
+            } catch(e) { return false; }
         }
         
-        // استرجاع البيانات من LocalStorage
         function loadDataFromLocalStorage() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
                     currentData = JSON.parse(saved);
-                    console.log(`📂 تم استرجاع ${currentData.length} سجل`);
+                    updateDataStatus(currentData.length);
+                    return true;
+                }
+                // محاولة استرجاع من المفتاح القديم
+                const oldKey = 'salary_system_main_data';
+                const oldSaved = localStorage.getItem(oldKey);
+                if (oldSaved) {
+                    currentData = JSON.parse(oldSaved);
+                    saveDataToLocalStorage(currentData);
+                    localStorage.removeItem(oldKey);
                     updateDataStatus(currentData.length);
                     return true;
                 }
@@ -343,46 +343,24 @@
                 updateDataStatus(0);
                 return false;
             } catch(e) {
-                console.error('خطأ في استرجاع البيانات:', e);
                 currentData = [];
                 updateDataStatus(0);
                 return false;
             }
         }
         
-        // تحديث حالة البيانات في الواجهة
         function updateDataStatus(count) {
             if (dataStatus) {
                 if (count > 0) {
-                    dataStatus.innerHTML = `✅ البيانات متاحة (${count.toLocaleString()} سجل)`;
+                    dataStatus.innerHTML = `✅ بيانات متاحة (${count.toLocaleString()} سجل)`;
                     dataStatus.style.background = 'rgba(72, 187, 120, 0.8)';
                 } else {
                     dataStatus.innerHTML = `📂 لا توجد بيانات - قم برفع ملف Excel`;
-                    dataStatus.style.background = 'rgba(0,0,0,0.6)';
+                    dataStatus.style.background = 'rgba(0,0,0,0.7)';
                 }
             }
         }
         
-        // مسح جميع البيانات
-        function clearAllData() {
-            if (confirm('⚠️ هل أنت متأكد من مسح جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
-                localStorage.removeItem(STORAGE_KEY);
-                currentData = [];
-                resultContainer.innerHTML = '';
-                searchMessage.innerHTML = '';
-                phoneInput.value = '';
-                if (fileInfo) fileInfo.classList.add('hidden');
-                updateDataStatus(0);
-                showMessage('🗑️ تم مسح جميع البيانات', 'success', uploadMessage);
-                
-                if (currentUser && currentUser.role === 'admin') {
-                    searchMessage.innerHTML = '<div class="info-message">ℹ️ تم مسح البيانات. قم برفع ملف Excel جديد.</div>';
-                    setTimeout(() => { if (searchMessage.innerHTML.includes('تم مسح البيانات')) searchMessage.innerHTML = ''; }, 3000);
-                }
-            }
-        }
-        
-        // تسجيل الدخول
         function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -405,7 +383,6 @@
             mainApp.classList.remove('hidden');
             footer.classList.remove('hidden');
             
-            // إظهار الأقسام حسب الصلاحية
             if (currentUser.role === 'admin') {
                 uploadSection.classList.remove('hidden');
                 setupFileUpload();
@@ -416,15 +393,12 @@
             
             userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'})`;
             
-            // تحميل البيانات
             loadDataFromLocalStorage();
             
-            // تنظيف النتائج
             resultContainer.innerHTML = '';
             searchMessage.innerHTML = '';
             phoneInput.value = '';
             
-            // رسالة ترحيب
             if (currentData.length > 0) {
                 searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل)</div>`;
                 setTimeout(() => { if (searchMessage.innerHTML.includes('البيانات متاحة')) searchMessage.innerHTML = ''; }, 3000);
@@ -435,10 +409,7 @@
                 setTimeout(() => { if (searchMessage.innerHTML.includes('قم برفع ملف')) searchMessage.innerHTML = ''; }, 4000);
             }
             
-            // تحديث حالة البيانات
             updateDataStatus(currentData.length);
-            
-            console.log(`✅ تم تسجيل الدخول كـ: ${user.name} (${user.role}) - السجلات: ${currentData.length}`);
         }
         
         function logout() {
@@ -451,7 +422,6 @@
             document.getElementById('loginError').innerHTML = '';
         }
         
-        // إعداد رفع الملف
         function setupFileUpload() {
             const uploadAreaElem = document.getElementById('uploadArea');
             if (!uploadAreaElem) return;
@@ -511,6 +481,7 @@
                 if (fileInfo) {
                     fileInfo.innerHTML = `✅ تم حفظ ${currentData.length.toLocaleString()} سجل بنجاح`;
                     fileInfo.classList.remove('hidden');
+                    setTimeout(() => fileInfo.classList.add('hidden'), 5000);
                 }
                 
                 showMessage(`✅ تم حفظ ${currentData.length.toLocaleString()} سجل بنجاح!`, 'success', uploadMessage);
@@ -519,10 +490,7 @@
                 searchMessage.innerHTML = '';
                 phoneInput.value = '';
                 
-                // تحديث حالة البيانات
                 updateDataStatus(currentData.length);
-                
-                console.log(`📁 تم تحميل وحفظ ${currentData.length} سجل`);
                 
             } catch (error) {
                 showMessage(`❌ خطأ: ${error.message}`, 'error', uploadMessage);
@@ -648,23 +616,23 @@
                                 <tr style="background:#f0f0f0;"><td style="font-weight:bold;">الراتب الأساسي</td><td style="font-weight:bold;">${basicSalary.toLocaleString()} دينار</td></tr>
                                 <tr><td colspan="2" style="background:#f7fafc; font-weight:bold;">الإضافات</td></tr>
                                 ${additionsHtml}
-                                <tr><td style="font-weight:bold;">مجموع الإضافات<\/td><td style="font-weight:bold;">${totalBonus.toLocaleString()} دينار<\/td><\/tr>
-                                <tr><td colspan="2" style="background:#f7fafc; font-weight:bold;">الاستقطاعات<\/td><\/tr>
+                                <tr><td style="font-weight:bold;">مجموع الإضافات</td><td style="font-weight:bold;">${totalBonus.toLocaleString()} دينار</td></tr>
+                                <tr><td colspan="2" style="background:#f7fafc; font-weight:bold;">الاستقطاعات</td></tr>
                                 ${deductionsHtml}
-                                <tr><td style="font-weight:bold;">مجموع الاستقطاعات<\/td><td style="color:#e53e3e; font-weight:bold;">${totalDeductions.toLocaleString()} دينار<\/td><\/tr>
-                                <tr class="total-row"><td style="font-size:18px;">صافي الراتب المستحق<\/td><td style="font-size:22px; color:#48bb78; font-weight:bold;">${netSalary.toLocaleString()} دينار<\/td><\/tr>
-                            <\/table>
-                        <\/div>
+                                <tr><td style="font-weight:bold;">مجموع الاستقطاعات</td><td style="color:#e53e3e; font-weight:bold;">${totalDeductions.toLocaleString()} دينار</td></tr>
+                                <tr class="total-row"><td style="font-size:18px;">صافي الراتب المستحق</td><td style="font-size:22px; color:#48bb78; font-weight:bold;">${netSalary.toLocaleString()} دينار</td></tr>
+                            </table>
+                        </div>
                         ${notesHtml}
-                    <\/div>
+                    </div>
                     <div class="slip-footer">
-                        <p>هذا الراتب مستحق الدفع بعد خصم كافة الاستقطاعات القانونية<\/p>
-                        <p>تاريخ الاستحقاق: ${new Date().toLocaleDateString('ar-EG')}<\/p>
-                    <\/div>
-                <\/div>
+                        <p>هذا الراتب مستحق الدفع بعد خصم كافة الاستقطاعات القانونية</p>
+                        <p>تاريخ الاستحقاق: ${new Date().toLocaleDateString('ar-EG')}</p>
+                    </div>
+                </div>
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-print" onclick="window.print()">🖨️ طباعة قسيمة الراتب<\/button>
-                <\/div>
+                    <button class="btn btn-print" onclick="window.print()">🖨️ طباعة قسيمة الراتب</button>
+                </div>
             `;
             
             resultContainer.innerHTML = slipHtml;
@@ -703,9 +671,7 @@
             return results;
         }
         
-        // تحميل البيانات عند بدء التشغيل
         loadDataFromLocalStorage();
-        console.log('✅ النظام جاهز - البيانات محفوظة في هذا المتصفح');
     </script>
 </body>
 </html>
