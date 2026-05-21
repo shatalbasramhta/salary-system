@@ -32,7 +32,8 @@
         .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-size: 16px; margin: 10px; transition: transform 0.2s; }
         .btn:hover { transform: scale(1.02); }
         .btn-print { background: #ed8936; }
-        .btn-share { background: #48bb78; }
+        .btn-primary { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .btn-warning { background: #ed8936; }
         
         .search-section { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         .search-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #4a5568; text-align: center; }
@@ -73,6 +74,7 @@
         .warning-message { background: #feebc8; color: #dd6b20; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
         .hidden { display: none; }
         .file-info { margin-top: 15px; padding: 10px; background: #e2e8f0; border-radius: 10px; color: #4a5568; font-size: 14px; }
+        .demo-data-info { background: #ebf8ff; border: 1px solid #90cdf4; border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 13px; color: #2b6cb0; }
         footer { text-align: center; margin-top: 25px; color: white; font-size: 14px; }
         
         @media print {
@@ -96,12 +98,12 @@
             <button class="btn" onclick="login()">دخول</button>
             <div id="loginError"></div>
             <div class="login-info">
-                <p>👑 نظام إدارة رواتب الموظفين</p>
-                <p>🌐 نظام مركزي - بيانات مشتركة للجميع</p>
+                <p>👑 نظام إدارة رواتب الموظفين - محطة شط البصرة</p>
+                <p>🌐 يعمل على GitHub Pages مع بيانات افتراضية مدمجة</p>
                 <hr style="margin: 10px 0;">
                 <p style="font-size: 11px;">👑 Admin: admin / aksaka</p>
                 <p style="font-size: 11px;">👤 User: user / user123</p>
-                <p style="font-size: 11px; color:#48bb78;">✅ البيانات مشتركة بين جميع المستخدمين والأجهزة</p>
+                <p style="font-size: 11px; color:#48bb78;">✅ يحتوي النظام على بيانات نموذجية للموظفين</p>
             </div>
         </div>
         
@@ -124,15 +126,16 @@
                 </div>
                 <div id="uploadMessage"></div>
                 <div id="fileInfo" class="file-info hidden"></div>
-                <div style="margin-top: 10px;">
-                    <button class="btn btn-share" onclick="showShareInfo()">🔗 رابط المشاركة</button>
+                <button class="btn btn-primary" onclick="resetToDemoData()">📋 استعادة البيانات النموذجية</button>
+                <div class="demo-data-info">
+                    💡 ملاحظة: البيانات مخزنة في متصفحك فقط. يمكنك رفع ملف Excel خاص بك، أو استخدام البيانات النموذجية المدمجة.
                 </div>
             </div>
             
             <div id="searchSection" class="search-section hidden">
                 <div class="search-title">🔍 البحث عن موظف</div>
                 <div class="search-input-group">
-                    <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف" dir="ltr" autocomplete="off">
+                    <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف (مثال: 07712345678)" dir="ltr" autocomplete="off">
                     <button class="btn" onclick="searchByPhone()">بحث</button>
                 </div>
                 <div id="searchMessage"></div>
@@ -142,13 +145,149 @@
         </div>
         
         <footer id="footer" class="hidden">
-            <p>نظام إدارة الرواتب المتكامل - نظام مركزي مع التخزين المحلي © 2026</p>
+            <p>نظام إدارة الرواتب المتكامل - محطة شط البصرة © 2026</p>
         </footer>
     </div>
 
     <script>
-        // مفتاح التخزين الموحد لجميع المستخدمين
+        // مفتاح التخزين
         const STORAGE_KEY = 'salary_system_shared_data';
+        
+        // بيانات نموذجية مدمجة
+        const DEMO_DATA = [
+            {
+                "رقم الهاتف": "07712345678",
+                "Beneficiary Name": "أحمد محمد حسن",
+                "الاسم": "أحمد محمد حسن",
+                "الرقم الوظيفي": "1001",
+                "القسم": "المالية",
+                "العنوان الوظيفي": "محاسب أول",
+                "الدرجة": "ثالثة",
+                "المرحلة": "ثاني",
+                "حالة الموظف": "متزوج",
+                "عدد الاطفال": "3",
+                "المصرف": "الرافدين",
+                "حالة المنتسب": "دوام كامل",
+                "الراتب الاسمي": "850000",
+                "الحافز الاضافي": "0.15",
+                "خطورة": "0.10",
+                "الشهادة": "0.12",
+                "مهنية": "0.08",
+                "استثنائية": "0.05",
+                "المنصب": "0.10",
+                "هندسية": "0",
+                "الموقع": "75000",
+                "زوجية": "50000",
+                "اطفال": "30000",
+                "التقاعد": "85000",
+                "التأمين": "25000",
+                "سلف": "0",
+                "الضمان الاجتماعي": "15000",
+                "إستقطاع": "0",
+                "مجموع الاستقطاع": "125000",
+                "شهر الراتب": "5/2026",
+                "الملاحظات": "موظف مجتهد"
+            },
+            {
+                "رقم الهاتف": "07723456789",
+                "Beneficiary Name": "سارة علي محمود",
+                "الاسم": "سارة علي محمود",
+                "الرقم الوظيفي": "1002",
+                "القسم": "الموارد البشرية",
+                "العنوان الوظيفي": "مديرة قسم",
+                "الدرجة": "ثانية",
+                "المرحلة": "ثالث",
+                "حالة الموظف": "متزوجة",
+                "عدد الاطفال": "2",
+                "المصرف": "العراقي",
+                "حالة المنتسب": "دوام كامل",
+                "الراتب الاسمي": "1200000",
+                "الحافز الاضافي": "0.20",
+                "خطورة": "0.05",
+                "الشهادة": "0.15",
+                "مهنية": "0.10",
+                "استثنائية": "0.08",
+                "المنصب": "0.20",
+                "هندسية": "0",
+                "الموقع": "100000",
+                "زوجية": "50000",
+                "اطفال": "20000",
+                "التقاعد": "120000",
+                "التأمين": "30000",
+                "سلف": "100000",
+                "الضمان الاجتماعي": "20000",
+                "إستقطاع": "0",
+                "مجموع الاستقطاع": "270000",
+                "شهر الراتب": "5/2026",
+                "الملاحظات": "موظفة متميزة"
+            },
+            {
+                "رقم الهاتف": "07734567890",
+                "Beneficiary Name": "عمر خالد ابراهيم",
+                "الاسم": "عمر خالد ابراهيم",
+                "الرقم الوظيفي": "1003",
+                "القسم": "الهندسة",
+                "العنوان الوظيفي": "مهندس ميكانيك",
+                "الدرجة": "ثالثة",
+                "المرحلة": "أول",
+                "حالة الموظف": "أعزب",
+                "عدد الاطفال": "0",
+                "المصرف": "الرافدين",
+                "حالة المنتسب": "دوام كامل",
+                "الراتب الاسمي": "950000",
+                "الحافز الاضافي": "0.12",
+                "خطورة": "0.15",
+                "الشهادة": "0.10",
+                "مهنية": "0.12",
+                "استثنائية": "0.05",
+                "المنصب": "0.08",
+                "هندسية": "0.15",
+                "الموقع": "80000",
+                "زوجية": "0",
+                "اطفال": "0",
+                "التقاعد": "95000",
+                "التأمين": "28000",
+                "سلف": "50000",
+                "الضمان الاجتماعي": "18000",
+                "إستقطاع": "0",
+                "مجموع الاستقطاع": "191000",
+                "شهر الراتب": "5/2026",
+                "الملاحظات": ""
+            },
+            {
+                "رقم الهاتف": "07745678901",
+                "Beneficiary Name": "ليلى عبد الرحمن",
+                "الاسم": "ليلى عبد الرحمن",
+                "الرقم الوظيفي": "1004",
+                "القسم": "التسويق",
+                "العنوان الوظيفي": "مسؤولة تسويق",
+                "الدرجة": "رابعة",
+                "المرحلة": "ثاني",
+                "حالة الموظف": "متزوجة",
+                "عدد الاطفال": "1",
+                "المصرف": "العراقي",
+                "حالة المنتسب": "دوام كامل",
+                "الراتب الاسمي": "750000",
+                "الحافز الاضافي": "0.10",
+                "خطورة": "0",
+                "الشهادة": "0.10",
+                "مهنية": "0.08",
+                "استثنائية": "0.05",
+                "المنصب": "0.06",
+                "هندسية": "0",
+                "الموقع": "60000",
+                "زوجية": "50000",
+                "اطفال": "15000",
+                "التقاعد": "75000",
+                "التأمين": "22000",
+                "سلف": "0",
+                "الضمان الاجتماعي": "12000",
+                "إستقطاع": "0",
+                "مجموع الاستقطاع": "109000",
+                "شهر الراتب": "5/2026",
+                "الملاحظات": "موظفة جديدة - فترة تجربة"
+            }
+        ];
         
         // المستخدمين
         const users = {
@@ -192,36 +331,49 @@
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    currentData = JSON.parse(saved);
-                    updateDataStatus(currentData.length);
-                    console.log(`📂 تم تحميل ${currentData.length} سجل`);
-                    return true;
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.length > 0) {
+                        currentData = parsed;
+                        updateDataStatus(currentData.length);
+                        console.log(`📂 تم تحميل ${currentData.length} سجل من التخزين المحلي`);
+                        return true;
+                    }
                 }
-                currentData = [];
-                updateDataStatus(0);
-                return false;
+                // إذا لم توجد بيانات محفوظة، استخدم البيانات النموذجية
+                console.log('📋 لا توجد بيانات محفوظة، جاري تحميل البيانات النموذجية...');
+                saveData(DEMO_DATA);
+                updateDataStatus(currentData.length);
+                return true;
             } catch(e) {
-                currentData = [];
-                updateDataStatus(0);
-                return false;
+                console.error('خطأ في التحميل:', e);
+                saveData(DEMO_DATA);
+                return true;
+            }
+        }
+        
+        // استعادة البيانات النموذجية
+        function resetToDemoData() {
+            if (currentUser && currentUser.role === 'admin') {
+                if (confirm('⚠️ هل أنت متأكد؟ سيتم استبدال البيانات الحالية بالبيانات النموذجية.')) {
+                    saveData(DEMO_DATA);
+                    showMessage('✅ تم استعادة البيانات النموذجية بنجاح!', 'success', uploadMessage);
+                    resultContainer.innerHTML = '';
+                    searchMessage.innerHTML = '';
+                    phoneInput.value = '';
+                }
             }
         }
         
         function updateDataStatus(count) {
             if (dataStatus) {
                 if (count > 0) {
-                    dataStatus.innerHTML = `✅ ${count.toLocaleString()} سجل - بيانات مشتركة`;
+                    dataStatus.innerHTML = `✅ ${count.toLocaleString()} سجل - بيانات محلية`;
                     dataStatus.style.background = 'rgba(72, 187, 120, 0.8)';
                 } else {
-                    dataStatus.innerHTML = `📂 لا توجد بيانات - قم برفع ملف`;
+                    dataStatus.innerHTML = `📂 لا توجد بيانات`;
                     dataStatus.style.background = 'rgba(0,0,0,0.7)';
                 }
             }
-        }
-        
-        function showShareInfo() {
-            const url = window.location.href;
-            alert(`🔗 شارك هذا الرابط مع جميع الموظفين:\n\n${url}\n\n📝 ملاحظة مهمة:\n• جميع المستخدمين سيرون نفس البيانات\n• كلمة مرور المستخدم: user123\n• كلمة مرور المدير: aksaka`);
         }
         
         // تسجيل الدخول
@@ -255,7 +407,7 @@
             }
             searchSection.classList.remove('hidden');
             
-            userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'}) | بيانات مشتركة`;
+            userBadge.innerHTML = `👤 ${user.name} (${user.role === 'admin' ? 'مدير' : 'مستخدم'})`;
             
             loadData();
             
@@ -264,13 +416,9 @@
             phoneInput.value = '';
             
             if (currentData.length > 0) {
-                searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل) - نظام مركزي</div>`;
+                let demoNote = currentData === DEMO_DATA ? ' (بيانات نموذجية)' : '';
+                searchMessage.innerHTML = `<div class="success-message">✅ البيانات متاحة (${currentData.length.toLocaleString()} سجل)${demoNote}</div>`;
                 setTimeout(() => { if (searchMessage.innerHTML.includes('البيانات متاحة')) searchMessage.innerHTML = ''; }, 3000);
-            } else if (currentUser.role === 'admin') {
-                searchMessage.innerHTML = '<div class="info-message">ℹ️ قم برفع ملف Excel لبدء العمل (سيتم حفظه تلقائياً)</div>';
-                setTimeout(() => { if (searchMessage.innerHTML.includes('قم برفع ملف')) searchMessage.innerHTML = ''; }, 4000);
-            } else {
-                searchMessage.innerHTML = '<div class="warning-message">⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع الملف.</div>';
             }
         }
         
@@ -341,12 +489,12 @@
                 saveData(jsonData);
                 
                 if (fileInfo) {
-                    fileInfo.innerHTML = `✅ تم حفظ ${jsonData.length.toLocaleString()} سجل بنجاح - متاح للجميع`;
+                    fileInfo.innerHTML = `✅ تم حفظ ${jsonData.length.toLocaleString()} سجل بنجاح`;
                     fileInfo.classList.remove('hidden');
                     setTimeout(() => fileInfo.classList.add('hidden'), 5000);
                 }
                 
-                showMessage(`✅ تم حفظ ${jsonData.length.toLocaleString()} سجل! الآن جميع المستخدمين يرون نفس البيانات.`, 'success', uploadMessage);
+                showMessage(`✅ تم حفظ ${jsonData.length.toLocaleString()} سجل!`, 'success', uploadMessage);
                 
                 resultContainer.innerHTML = '';
                 searchMessage.innerHTML = '';
@@ -362,7 +510,7 @@
         
         function searchByPhone() {
             if (currentData.length === 0) {
-                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع الملف.</div>';
+                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات. قم برفع ملف Excel أو استخدم البيانات النموذجية.</div>';
                 resultContainer.innerHTML = '';
                 return;
             }
@@ -374,9 +522,14 @@
                 return;
             }
             
+            // بحث متسامح مع الأرقام
             const employee = currentData.find(row => {
                 const phone = String(row['رقم الهاتف'] || row['phone'] || '');
-                return phone === phoneNumber || phone === '0' + phoneNumber || phone === phoneNumber.substring(1);
+                const cleanPhone = phone.replace(/[^0-9]/g, '');
+                const cleanInput = phoneNumber.replace(/[^0-9]/g, '');
+                return cleanPhone === cleanInput || 
+                       cleanPhone === cleanInput.substring(1) ||
+                       cleanPhone.substring(1) === cleanInput;
             });
             
             if (!employee) {
@@ -423,22 +576,22 @@
             
             let additionsHtml = '';
             if (bonusPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td>${bonus.toLocaleString()} دينار</td></tr>`;
-            if (hazardPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td>${hazard.toLocaleString()} دينار`;
-            if (certificatePercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)`;
-            if (professionalPercent > 0) additionsHtml += `</tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)`;
-            if (exceptionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ استثنائية (${(exceptionalPercent*100).toFixed(1)}%)`;
-            if (positionPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ المنصب (${(positionPercent*100).toFixed(1)}%)`;
-            if (engineeringPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ هندسية (${(engineeringPercent*100).toFixed(1)}%)`;
-            if (locationAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع`;
-            if (maritalAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية`;
-            if (childrenAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${employee['عدد الاطفال'] || '0'} أطفال)`;
+            if (hazardPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td>${hazard.toLocaleString()} دينار</td></tr>`;
+            if (certificatePercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)</td><td>${certificate.toLocaleString()} دينار</td></tr>`;
+            if (professionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)</td><td>${professional.toLocaleString()} دينار</td></tr>`;
+            if (exceptionalPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ استثنائية (${(exceptionalPercent*100).toFixed(1)}%)</td><td>${exceptional.toLocaleString()} دينار</td></tr>`;
+            if (positionPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ المنصب (${(positionPercent*100).toFixed(1)}%)</td><td>${position.toLocaleString()} دينار</td></tr>`;
+            if (engineeringPercent > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ هندسية (${(engineeringPercent*100).toFixed(1)}%)</td><td>${engineering.toLocaleString()} دينار</td></tr>`;
+            if (locationAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع</td><td>${locationAmount.toLocaleString()} دينار</td></tr>`;
+            if (maritalAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية</td><td>${maritalAmount.toLocaleString()} دينار</td></tr>`;
+            if (childrenAmount > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${employee['عدد الاطفال'] || '0'} أطفال)</td><td>${childrenAmount.toLocaleString()} دينار</td></tr>`;
             
             let deductionsHtml = '';
-            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد`;
-            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين`;
-            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف`;
-            if (socialSecurity > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي`;
-            if (otherDeductions > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ استقطاعات أخرى`;
+            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد</td><td>${retirement.toLocaleString()} دينار</td></tr>`;
+            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين</td><td>${insurance.toLocaleString()} دينار</td></tr>`;
+            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف</td><td>${loans.toLocaleString()} دينار</td></tr>`;
+            if (socialSecurity > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي</td><td>${socialSecurity.toLocaleString()} دينار</td></tr>`;
+            if (otherDeductions > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ استقطاعات أخرى</td><td>${otherDeductions.toLocaleString()} دينار</td></tr>`;
             
             let notesHtml = '';
             if (notes && notes !== '' && notes !== '0' && notes !== 'null') {
@@ -529,9 +682,9 @@
             return results;
         }
         
-        loadData();
-        console.log('✅ النظام جاهز - البيانات مشتركة بين جميع المستخدمين على نفس الجهاز');
-        console.log('⚠️ ملاحظة: إذا كنت تريد مشاركة البيانات بين أجهزة مختلفة، تحتاج إلى استخدام رابط واحد للجميع');
+        // تحميل البيانات عند بدء التشغيل
+        console.log('✅ النظام جاهز للعمل على GitHub Pages');
+        console.log('📋 يحتوي النظام على بيانات نموذجية يمكن استخدامها فوراً');
     </script>
 </body>
 </html>
