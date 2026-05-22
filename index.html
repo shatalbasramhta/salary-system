@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة رواتب الموظفين - محطة شط البصرة</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
@@ -82,7 +83,7 @@
                 <p>👤 <strong>موظف</strong>: user / user123</p>
                 <hr>
                 <p style="color:#48bb78;">✅ قم برفع ملف Excel الخاص بجميع الموظفين</p>
-                <p style="color:#ed8936;">📌 بعد رفع الملف، سيتم تحديث البيانات تلقائياً لجميع المستخدمين</p>
+                <p style="color:#ed8936;">📌 البيانات مشتركة بين جميع المتصفحات والأجهزة ☁️</p>
             </div>
         </div>
         
@@ -118,7 +119,7 @@
                 </div>
                 
                 <div class="info-message" style="margin-top: 15px; font-size: 12px;">
-                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، سيتم تحديث البيانات تلقائياً لجميع الموظفين المتصلين.
+                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، ستظهر البيانات تلقائياً لجميع الموظفين في جميع المتصفحات والأجهزة!
                 </div>
             </div>
             
@@ -141,6 +142,12 @@
     </div>
 
     <script>
+        // ==================== Supabase Configuration ====================
+        const SUPABASE_URL = 'https://qvjjipwzgpymlnxorvkz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2amppcHd6Z3B5bWxueG9ydmt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUzNzgsImV4cCI6MTg0NzcwMzM3OH0.YzGFXZKVrTQbqqY3wGQgQxZ5H5L1BwKZQVT5Jm1K2fg';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // ==================== المستخدمين ====================
         const users = {
             admin: { password: 'aksaka', role: 'admin', name: 'مدير النظام' },
@@ -150,7 +157,7 @@
         // ==================== البيانات ====================
         let currentData = [];
         let currentUser = null;
-        const STORAGE_KEY = 'salary_system_master_data';
+        const TABLE_NAME = 'salary_data';
         
         // ==================== عناصر DOM ====================
         const loginContainer = document.getElementById('loginContainer');
@@ -170,44 +177,76 @@
         
         // ==================== وظائف البيانات ====================
         
-        function saveData(data) {
-            currentData = data;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            updateUI();
-            // 🔥 إرسال بث لتحديث جميع النوافذ المفتوحة
-            broadcastDataUpdate();
-            console.log(`💾 تم حفظ ${data.length} موظف`);
-        }
-        
-        // 🔥 وظيفة جديدة: بث التحديث لجميع النوافذ/التبويبات
-        function broadcastDataUpdate() {
-            localStorage.setItem('salary_data_updated', Date.now().toString());
-        }
-        
-        // 🔥 الاستماع لتحديثات من نوافذ أخرى
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'salary_data_updated' && currentUser) {
-                console.log('📡 تم اكتشاف تحديث جديد في البيانات!');
-                loadData();
-                showMessage('✅ تم تحديث البيانات تلقائياً!', 'success', searchMessage);
-                setTimeout(() => searchMessage.innerHTML = '', 3000);
+        async function saveDataToSupabase(data) {
+            try {
+                currentData = data;
+                
+                // حذف البيانات القديمة أولاً
+                await supabase.from(TABLE_NAME).delete().neq('id', 0);
+                
+                // إدراج البيانات الجديدة
+                const { error } = await supabase.from(TABLE_NAME).insert(
+                    data.map((emp, index) => ({
+                        id: index + 1,
+                        employee_data: emp,
+                        created_at: new Date().toISOString()
+                    }))
+                );
+                
+                if (error) throw error;
+                
+                updateUI();
+                console.log(`💾 تم حفظ ${data.length} موظف في قاعدة البيانات`);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ البيانات:', error);
+                return false;
             }
-        });
+        }
         
-        function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    currentData = JSON.parse(saved);
+        async function loadDataFromSupabase() {
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('employee_data')
+                    .order('id', { ascending: true });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    currentData = data.map(row => row.employee_data);
                     updateUI();
-                    console.log(`📂 تم تحميل ${currentData.length} موظف`);
+                    console.log(`📂 تم تحميل ${currentData.length} موظف من قاعدة البيانات`);
                     return true;
-                } catch(e) {}
+                } else {
+                    currentData = [];
+                    updateUI();
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                currentData = [];
+                updateUI();
+                return false;
             }
-            currentData = [];
-            updateUI();
-            return false;
         }
+        
+        // 🔥 الاستماع لتحديثات Realtime من Supabase
+        supabase
+            .channel('salary_updates')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: TABLE_NAME },
+                (payload) => {
+                    console.log('📡 تحديث جديد من Supabase!', payload);
+                    if (currentUser) {
+                        loadDataFromSupabase();
+                        showMessage('✅ تم تحديث البيانات تلقائياً!', 'success', searchMessage);
+                        setTimeout(() => searchMessage.innerHTML = '', 3000);
+                    }
+                }
+            )
+            .subscribe();
         
         function updateUI() {
             const count = currentData.length;
@@ -238,8 +277,8 @@
             }
         }
         
-        function refreshData() {
-            loadData();
+        async function refreshData() {
+            await loadDataFromSupabase();
             showMessage('✅ تم تحديث البيانات', 'success', searchMessage);
             setTimeout(() => searchMessage.innerHTML = '', 2000);
         }
@@ -307,8 +346,14 @@
                     throw new Error('الملف لا يحتوي على بيانات');
                 }
                 
-                saveData(jsonData);
-                showMessage(`✅ تم رفع ${jsonData.length.toLocaleString()} موظف بنجاح!`, 'success', uploadMessage);
+                showMessage('📡 جاري حفظ البيانات في السحابة...', 'info', uploadMessage);
+                const success = await saveDataToSupabase(jsonData);
+                
+                if (success) {
+                    showMessage(`✅ تم رفع ${jsonData.length.toLocaleString()} موظف بنجاح! البيانات متاحة الآن لجميع المستخدمين ☁️`, 'success', uploadMessage);
+                } else {
+                    throw new Error('فشل حفظ البيانات');
+                }
                 
                 resultContainer.innerHTML = '';
                 phoneInput.value = '';
@@ -375,7 +420,6 @@
                 return;
             }
             
-            // البحث برقم الهاتف
             const employee = currentData.find(row => {
                 const phone = String(row['رقم الهاتف'] || row['phone'] || '');
                 const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -502,7 +546,7 @@
         }
         
         // ==================== تسجيل الدخول ====================
-        function login() {
+        async function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
@@ -530,8 +574,8 @@
             
             searchSection.classList.remove('hidden');
             
-            // تحميل البيانات
-            loadData();
+            // تحميل البيانات من Supabase
+            await loadDataFromSupabase();
             
             resultContainer.innerHTML = '';
             phoneInput.value = '';
@@ -557,7 +601,7 @@
         }
         
         console.log('✅ النظام جاهز للعمل!');
-        console.log('📌 قم برفع ملف Excel الذي يحتوي على جميع بيانات الموظفين');
+        console.log('📌 البيانات مرتبطة بخادم Supabase السحابي');
     </script>
 </body>
 </html>
