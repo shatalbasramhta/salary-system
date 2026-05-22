@@ -82,7 +82,7 @@
                 <p>👤 <strong>موظف</strong>: user / user123</p>
                 <hr>
                 <p style="color:#48bb78;">✅ قم برفع ملف Excel الخاص بجميع الموظفين</p>
-                <p style="color:#ed8936;">📌 بعد رفع الملف، سيتم حفظه ويمكن البحث عن أي موظف</p>
+                <p style="color:#ed8936;">📌 بعد رفع الملف، سيتم تحديث البيانات تلقائياً لجميع المستخدمين</p>
             </div>
         </div>
         
@@ -118,7 +118,7 @@
                 </div>
                 
                 <div class="info-message" style="margin-top: 15px; font-size: 12px;">
-                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، يمكن لجميع الموظفين البحث باستخدام أرقام هواتفهم.
+                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، سيتم تحديث البيانات تلقائياً لجميع الموظفين المتصلين.
                 </div>
             </div>
             
@@ -174,8 +174,25 @@
             currentData = data;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             updateUI();
+            // 🔥 إرسال بث لتحديث جميع النوافذ المفتوحة
+            broadcastDataUpdate();
             console.log(`💾 تم حفظ ${data.length} موظف`);
         }
+        
+        // 🔥 وظيفة جديدة: بث التحديث لجميع النوافذ/التبويبات
+        function broadcastDataUpdate() {
+            localStorage.setItem('salary_data_updated', Date.now().toString());
+        }
+        
+        // 🔥 الاستماع لتحديثات من نوافذ أخرى
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'salary_data_updated' && currentUser) {
+                console.log('📡 تم اكتشاف تحديث جديد في البيانات!');
+                loadData();
+                showMessage('✅ تم تحديث البيانات تلقائياً!', 'success', searchMessage);
+                setTimeout(() => searchMessage.innerHTML = '', 3000);
+            }
+        });
         
         function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -412,7 +429,7 @@
             const notes = emp['الملاحظات'] || '';
             
             let additionsHtml = '';
-            if (bonus > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${bonus.toLocaleString()} دينار</td></table>`;
+            if (bonus > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${bonus.toLocaleString()} دينار</td></tr>`;
             if (hazard > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${hazard.toLocaleString()} دينار</td></tr>`;
             if (certificate > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)</td><td style="text-align:left;">${certificate.toLocaleString()} دينار</td></tr>`;
             if (professional > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${professional.toLocaleString()} دينار</td></tr>`;
