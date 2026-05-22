@@ -5,313 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة رواتب الموظفين - محطة شط البصرة</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            padding: 20px; 
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
         
-        /* ==================== تسجيل الدخول ==================== */
-        .login-container { 
-            background: white; 
-            border-radius: 25px; 
-            padding: 40px; 
-            max-width: 400px; 
-            margin: 50px auto; 
-            text-align: center; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-        }
+        .login-container { background: white; border-radius: 25px; padding: 40px; max-width: 400px; margin: 50px auto; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .login-container h2 { color: #4a5568; margin-bottom: 20px; }
-        .login-container input { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 10px; 
-            font-size: 16px; 
-        }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; }
         .login-container .btn { width: 100%; margin: 0; padding: 12px; font-size: 16px; }
-        .btn { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            border: none; 
-            padding: 10px 25px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            margin: 5px; 
-            transition: transform 0.2s; 
-        }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; margin: 5px; transition: transform 0.2s; }
         .btn:hover { transform: scale(1.02); }
         .btn-print { background: #ed8936; }
         .btn-excel { background: #1f7b4d; }
         .hidden { display: none; }
-        .login-error { 
-            background: #fed7d7; 
-            color: #c53030; 
-            padding: 10px; 
-            border-radius: 8px; 
-            margin-top: 10px; 
-        }
-        .login-info { 
-            margin-top: 20px; 
-            padding: 12px; 
-            background: #e2e8f0; 
-            border-radius: 10px; 
-            font-size: 12px; 
-        }
         
-        /* ==================== الرأس ==================== */
-        .header { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            text-align: center; 
-            position: relative; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1); 
-        }
+        .login-error { background: #fed7d7; color: #c53030; padding: 10px; border-radius: 8px; margin-top: 10px; }
+        .login-info { margin-top: 20px; padding: 12px; background: #e2e8f0; border-radius: 10px; font-size: 12px; }
+        
+        .header { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .header h1 { color: #4a5568; font-size: 24px; }
-        .logout-btn { 
-            position: absolute; 
-            top: 15px; 
-            left: 15px; 
-            background: #e53e3e; 
-            color: white; 
-            border: none; 
-            padding: 6px 15px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 12px; 
-        }
-        .user-badge { 
-            position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            padding: 6px 15px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-        }
-        .data-status { 
-            background: #48bb78; 
-            color: white; 
-            padding: 5px 15px; 
-            border-radius: 20px; 
-            display: inline-block; 
-            margin-top: 10px; 
-            font-size: 12px; 
-            cursor: pointer; 
-        }
+        .logout-btn { position: absolute; top: 15px; left: 15px; background: #e53e3e; color: white; border: none; padding: 6px 15px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .user-badge { position: absolute; top: 15px; right: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; }
+        .data-status { background: #48bb78; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-top: 10px; font-size: 12px; cursor: pointer; }
         
-        /* ==================== الأقسام ==================== */
-        .upload-section, .search-section { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 25px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1); 
-        }
-        .upload-area { 
-            border: 3px dashed #cbd5e0; 
-            border-radius: 15px; 
-            padding: 30px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            background: #f7fafc; 
-            text-align: center; 
-        }
-        .upload-area:hover { 
-            border-color: #667eea; 
-            background: #edf2f7; 
-        }
+        .upload-section, .search-section { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 30px; cursor: pointer; transition: all 0.3s; background: #f7fafc; text-align: center; }
+        .upload-area:hover { border-color: #667eea; background: #edf2f7; }
         .file-input { display: none; }
-        .search-title { 
-            text-align: center; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            font-size: 18px; 
-            color: #4a5568; 
-        }
-        .search-input-group { 
-            display: flex; 
-            gap: 10px; 
-            justify-content: center; 
-            flex-wrap: wrap; 
-        }
-        .search-input-group input { 
-            flex: 2; 
-            min-width: 250px; 
-            padding: 12px 15px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            text-align: center; 
-        }
-        .search-input-group input:focus { 
-            outline: none; 
-            border-color: #667eea; 
-        }
         
-        /* ==================== قسيمة الراتب ==================== */
-        .salary-slip { 
-            background: white; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            margin-top: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-        }
-        .slip-header { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            padding: 20px; 
-            text-align: center; 
-        }
+        .search-title { text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 18px; color: #4a5568; }
+        .search-input-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .search-input-group input { flex: 2; min-width: 250px; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; text-align: center; }
+        .search-input-group input:focus { outline: none; border-color: #667eea; }
+        
+        .salary-slip { background: white; border-radius: 20px; overflow: hidden; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .slip-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
         .slip-body { padding: 20px; }
-        .employee-details { 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            overflow: hidden; 
-        }
-        .employee-details h3 { 
-            background: #f7fafc; 
-            padding: 12px 20px; 
-            margin: 0; 
-            font-size: 16px; 
-        }
+        .employee-details { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+        .employee-details h3 { background: #f7fafc; padding: 12px 20px; margin: 0; font-size: 16px; }
         .details-table { width: 100%; border-collapse: collapse; }
-        .details-table td { 
-            padding: 10px 15px; 
-            border-bottom: 1px solid #e2e8f0; 
-            font-size: 14px; 
-        }
-        .details-table td:first-child { 
-            font-weight: bold; 
-            background: #f8fafc; 
-            width: 35%; 
-        }
-        .salary-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-        }
-        .salary-table td { 
-            padding: 10px 15px; 
-            border-bottom: 1px solid #e2e8f0; 
-            font-size: 14px; 
-        }
+        .details-table td { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        .details-table td:first-child { font-weight: bold; background: #f8fafc; width: 35%; }
+        
+        .salary-table { width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .salary-table td { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
         .salary-table td:first-child { font-weight: 600; }
-        .total-row td { 
-            font-weight: bold; 
-            font-size: 18px; 
-            color: #48bb78; 
-            border-top: 2px solid #667eea; 
-            padding: 15px; 
-        }
-        .notes-section { 
-            background: #fef5e7; 
-            padding: 15px; 
-            border-radius: 10px; 
-            margin-top: 20px; 
-            border-right: 4px solid #ed8936; 
-        }
+        .total-row td { font-weight: bold; font-size: 18px; color: #48bb78; border-top: 2px solid #667eea; padding: 15px; }
         
-        /* ==================== الرسائل ==================== */
-        .error-message { 
-            background: #fed7d7; 
-            color: #c53030; 
-            padding: 12px; 
-            border-radius: 10px; 
-            text-align: center; 
-        }
-        .success-message { 
-            background: #c6f6d5; 
-            color: #276749; 
-            padding: 12px; 
-            border-radius: 10px; 
-            text-align: center; 
-        }
-        .info-message { 
-            background: #e2e8f0; 
-            color: #4a5568; 
-            padding: 12px; 
-            border-radius: 10px; 
-            text-align: center; 
-        }
+        .notes-section { background: #fef5e7; padding: 15px; border-radius: 10px; margin-top: 20px; border-right: 4px solid #ed8936; }
+        .error-message { background: #fed7d7; color: #c53030; padding: 12px; border-radius: 10px; text-align: center; }
+        .success-message { background: #c6f6d5; color: #276749; padding: 12px; border-radius: 10px; text-align: center; }
+        .info-message { background: #e2e8f0; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; }
         
-        /* ==================== قائمة الموظفين ==================== */
-        .employee-list { 
-            max-height: 250px; 
-            overflow-y: auto; 
-            margin-top: 15px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 10px; 
-            background: white; 
-        }
-        .employee-item { 
-            padding: 10px 15px; 
-            border-bottom: 1px solid #e2e8f0; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between; 
-        }
+        .employee-list { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; }
+        .employee-item { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; }
         .employee-item:hover { background: #f0f0f0; }
         
-        /* ==================== تذييل الصفحة ==================== */
-        footer { 
-            text-align: center; 
-            color: white; 
-            margin-top: 20px; 
-            font-size: 12px; 
-        }
+        footer { text-align: center; color: white; margin-top: 20px; font-size: 12px; }
         
-        @media print { 
-            .upload-section, .search-section, .btn, .logout-btn, .user-badge, .data-status { display: none; } 
-        }
-        @media (max-width: 768px) { 
-            .logout-btn, .user-badge { position: static; display: inline-block; margin: 5px; } 
-            .header { padding-top: 50px; } 
-        }
+        @media print { .upload-section, .search-section, .btn, .logout-btn, .user-badge, .data-status { display: none; } }
+        @media (max-width: 768px) { .logout-btn, .user-badge { position: static; display: inline-block; margin: 5px; } .header { padding-top: 50px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ==================== نموذج تسجيل الدخول ==================== -->
         <div id="loginContainer" class="login-container">
             <h2>🏭 نظام إدارة رواتب الموظفين</h2>
             <h3 style="color:#667eea; margin-bottom: 20px;">محطة شط البصرة</h3>
-            
             <input type="text" id="username" placeholder="اسم المستخدم" autocomplete="off">
             <input type="password" id="password" placeholder="كلمة المرور" autocomplete="off">
-            <button class="btn" onclick="handleLogin()">دخول</button>
-            
+            <button class="btn" onclick="login()">دخول</button>
             <div id="loginError"></div>
-            
             <div class="login-info">
                 <p>👑 <strong>مدير النظام</strong>: admin / aksaka</p>
                 <p>👤 <strong>موظف</strong>: user / user123</p>
-                <hr style="margin: 10px 0;">
+                <hr>
                 <p style="color:#48bb78;">✅ قم برفع ملف Excel الخاص بجميع الموظفين</p>
-                <p style="color:#ed8936;">📌 البيانات مشتركة بين جميع المتصفحات والأجهزة ☁️</p>
+                <p style="color:#ed8936;">📌 بعد رفع الملف، سيتم حفظه ويمكن البحث عن أي موظف</p>
             </div>
         </div>
         
-        <!-- ==================== التطبيق الرئيسي ==================== -->
         <div id="mainApp" class="hidden">
-            <!-- الرأس -->
             <div class="header">
-                <button class="logout-btn" onclick="handleLogout()">🚪 تسجيل خروج</button>
+                <button class="logout-btn" onclick="logout()">🚪 تسجيل خروج</button>
                 <div class="user-badge" id="userBadge"></div>
                 <h1>🏭 نظام إدارة رواتب الموظفين</h1>
                 <p>محطة شط البصرة</p>
-                <div class="data-status" id="dataStatus" onclick="refreshEmployeeData()">📊 جاري التحميل...</div>
+                <div class="data-status" id="dataStatus" onclick="refreshData()">📊 جاري التحميل...</div>
             </div>
             
             <!-- قسم المدير فقط -->
@@ -327,273 +108,180 @@
                 </div>
                 <div id="uploadMessage"></div>
                 
+                <!-- عرض عدد الموظفين -->
                 <div id="employeeCount" style="margin-top: 15px; font-size: 14px; color: #4a5568; text-align:center;"></div>
                 
+                <!-- قائمة الموظفين -->
                 <div id="employeeListContainer" class="employee-list hidden">
                     <div style="background: #f7fafc; padding: 10px; font-weight: bold;">📋 قائمة الموظفين (المسجلين)</div>
                     <div id="employeeList"></div>
                 </div>
                 
                 <div class="info-message" style="margin-top: 15px; font-size: 12px;">
-                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، ستظهر البيانات تلقائياً لجميع الموظفين في جميع المتصفحات والأجهزة!
+                    💡 <strong>ملاحظة:</strong> بعد رفع الملف، يمكن لجميع الموظفين البحث باستخدام أرقام هواتفهم.
                 </div>
             </div>
             
-            <!-- قسم البحث -->
+            <!-- قسم البحث (لجميع المستخدمين) -->
             <div id="searchSection" class="search-section">
                 <div class="search-title">🔍 البحث عن قسيمة الراتب</div>
                 <div class="search-input-group">
                     <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف (مثال: 07712345678)" dir="ltr" autocomplete="off">
-                    <button class="btn" onclick="handleSearch()">🔎 بحث</button>
+                    <button class="btn" onclick="searchByPhone()">🔎 بحث</button>
                 </div>
                 <div id="searchMessage"></div>
             </div>
             
-            <!-- عرض النتائج -->
             <div id="resultContainer"></div>
         </div>
         
-        <!-- التذييل -->
         <footer id="footer" class="hidden">
             <p>نظام إدارة الرواتب - محطة شط البصرة © 2026</p>
         </footer>
     </div>
 
     <script>
-        // ================================================================
-        // 1️⃣ إعدادات Supabase - قاعدة البيانات السحابية
-        // ================================================================
-        const SUPABASE_URL = 'https://qvjjipwzgpymlnxorvkz.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2amppcHd6Z3B5bWxueG9ydmt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUzNzgsImV4cCI6MTg0NzcwMzM3OH0.YzGFXZKVrTQbqqY3wGQgQxZ5H5L1BwKZQVT5Jm1K2fg';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const TABLE_NAME = 'salary_data';
-
-        // ================================================================
-        // 2️⃣ بيانات المستخدمين
-        // ================================================================
-        const USERS = {
+        // ==================== المستخدمين ====================
+        const users = {
             admin: { password: 'aksaka', role: 'admin', name: 'مدير النظام' },
             user: { password: 'user123', role: 'user', name: 'موظف' }
         };
-
-        // ================================================================
-        // 3️⃣ المتغيرات العامة
-        // ================================================================
+        
+        // ==================== البيانات ====================
+        let currentData = [];
         let currentUser = null;
-        let employeesData = [];
-
-        // ================================================================
-        // 4️⃣ دوال تسجيل الدخول والخروج
-        // ================================================================
-        function handleLogin() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const loginError = document.getElementById('loginError');
-
-            const user = USERS[username];
-            if (!user || user.password !== password) {
-                loginError.innerHTML = '<div class="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>';
-                return;
-            }
-
-            currentUser = { username, role: user.role, name: user.name };
-            showMainApp();
-        }
-
-        function handleLogout() {
-            currentUser = null;
-            employeesData = [];
-            document.getElementById('loginContainer').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('footer').classList.add('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('loginError').innerHTML = '';
-        }
-
-        function showMainApp() {
-            document.getElementById('loginContainer').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('footer').classList.remove('hidden');
-
-            const userBadge = document.getElementById('userBadge');
-            if (currentUser.role === 'admin') {
-                document.getElementById('adminSection').classList.remove('hidden');
-                userBadge.innerHTML = `👑 ${currentUser.name} (مدير) - صلاحية كاملة`;
-                setupFileUpload();
-            } else {
-                document.getElementById('adminSection').classList.add('hidden');
-                userBadge.innerHTML = `👤 ${currentUser.name} (موظف) - صلاحية البحث فقط`;
-            }
-
-            loadEmployeesFromDatabase();
-        }
-
-        // ================================================================
-        // 5️⃣ دوال قاعدة البيانات
-        // ================================================================
-        async function loadEmployeesFromDatabase() {
+        const STORAGE_KEY = 'salary_system_master_data';
+        
+        // ==================== عناصر DOM ====================
+        const loginContainer = document.getElementById('loginContainer');
+        const mainApp = document.getElementById('mainApp');
+        const footer = document.getElementById('footer');
+        const userBadge = document.getElementById('userBadge');
+        const dataStatus = document.getElementById('dataStatus');
+        const adminSection = document.getElementById('adminSection');
+        const searchSection = document.getElementById('searchSection');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const phoneInput = document.getElementById('phoneNumber');
+        const searchMessage = document.getElementById('searchMessage');
+        const employeeListContainer = document.getElementById('employeeListContainer');
+        const employeeList = document.getElementById('employeeList');
+        const employeeCount = document.getElementById('employeeCount');
+        
+        // ==================== وظائف البيانات ====================
+        
+        async function saveData(data) {
+            currentData = data;
             try {
-                const { data, error } = await supabase
-                    .from(TABLE_NAME)
-                    .select('employee_data')
-                    .order('id', { ascending: true });
-
-                if (error) throw error;
-
-                employeesData = data ? data.map(row => row.employee_data) : [];
-                updateUIStatus();
-                console.log(`✅ تم تحميل ${employeesData.length} موظف`);
-            } catch (error) {
-                console.error('❌ خطأ في تحميل البيانات:', error);
-                employeesData = [];
-                updateUIStatus();
+                await window.storage.set(STORAGE_KEY, JSON.stringify(data), true);
+                console.log(`💾 تم حفظ ${data.length} موظف (مشترك)`);
+            } catch(e) {
+                console.error('خطأ في الحفظ:', e);
             }
+            updateUI();
         }
-
-        async function saveEmployeesToDatabase(data) {
+        
+        async function loadData() {
             try {
-                // حذف البيانات القديمة
-                await supabase.from(TABLE_NAME).delete().neq('id', 0);
-
-                // إضافة البيانات الجديدة
-                const { error } = await supabase.from(TABLE_NAME).insert(
-                    data.map((emp, index) => ({
-                        id: index + 1,
-                        employee_data: emp,
-                        created_at: new Date().toISOString()
-                    }))
-                );
-
-                if (error) throw error;
-
-                employeesData = data;
-                updateUIStatus();
-                console.log(`✅ تم حفظ ${data.length} موظف`);
-                return true;
-            } catch (error) {
-                console.error('❌ خطأ في حفظ البيانات:', error);
-                return false;
-            }
-        }
-
-        // الاستماع لتحديثات Realtime
-        supabase
-            .channel('salary_updates')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: TABLE_NAME },
-                (payload) => {
-                    if (currentUser) {
-                        loadEmployeesFromDatabase();
-                        showMessage('✅ تم تحديث البيانات تلقائياً!', 'success', 'searchMessage');
-                    }
+                const result = await window.storage.get(STORAGE_KEY, true);
+                if (result && result.value) {
+                    currentData = JSON.parse(result.value);
+                    updateUI();
+                    console.log(`📂 تم تحميل ${currentData.length} موظف`);
+                    return true;
                 }
-            )
-            .subscribe();
-
-        // ================================================================
-        // 6️⃣ دوال واجهة المستخدم
-        // ================================================================
-        function updateUIStatus() {
-            const count = employeesData.length;
-            const dataStatus = document.getElementById('dataStatus');
-            const employeeCount = document.getElementById('employeeCount');
-
+            } catch(e) {
+                console.log('لا توجد بيانات محفوظة بعد');
+            }
+            currentData = [];
+            updateUI();
+            return false;
+        }
+        
+        function updateUI() {
+            const count = currentData.length;
+            if (employeeCount) {
+                employeeCount.innerHTML = `📊 عدد الموظفين المسجلين: ${count.toLocaleString()}`;
+            }
             dataStatus.innerHTML = count > 0 ? `✅ ${count.toLocaleString()} موظف مسجل` : '📂 لا توجد بيانات';
-            employeeCount.innerHTML = `📊 عدد الموظفين المسجلين: ${count.toLocaleString()}`;
-
-            // عرض قائمة الموظفين للمدير
-            if (currentUser && currentUser.role === 'admin' && count > 0) {
-                displayEmployeesList();
+            
+            if (currentUser && currentUser.role === 'admin' && currentData.length > 0) {
+                employeeListContainer.classList.remove('hidden');
+                let html = '';
+                const displayCount = Math.min(currentData.length, 50);
+                for (let i = 0; i < displayCount; i++) {
+                    const emp = currentData[i];
+                    const name = emp['الاسم'] || emp['Beneficiary Name'] || emp['name'] || '-';
+                    const phone = emp['رقم الهاتف'] || emp['phone'] || '-';
+                    html += `
+                        <div class="employee-item" onclick="setPhoneAndSearch('${phone}')">
+                            <span>👤 ${name.substring(0, 30)}</span>
+                            <span style="color:#667eea;">📞 ${phone}</span>
+                        </div>
+                    `;
+                }
+                if (currentData.length > 50) {
+                    html += `<div class="employee-item" style="justify-content:center;">... و ${currentData.length - 50} موظف آخر</div>`;
+                }
+                employeeList.innerHTML = html;
             }
         }
-
-        function displayEmployeesList() {
-            const employeeListContainer = document.getElementById('employeeListContainer');
-            const employeeList = document.getElementById('employeeList');
-
-            employeeListContainer.classList.remove('hidden');
-            let html = '';
-            const displayCount = Math.min(employeesData.length, 50);
-
-            for (let i = 0; i < displayCount; i++) {
-                const emp = employeesData[i];
-                const name = emp['الاسم'] || emp['name'] || '-';
-                const phone = emp['رقم الهاتف'] || emp['phone'] || '-';
-                html += `
-                    <div class="employee-item" onclick="selectEmployeePhone('${phone}')">
-                        <span>👤 ${name.substring(0, 30)}</span>
-                        <span style="color:#667eea;">📞 ${phone}</span>
-                    </div>
-                `;
-            }
-
-            if (employeesData.length > 50) {
-                html += `<div class="employee-item" style="justify-content:center;">... و ${employeesData.length - 50} موظف آخر</div>`;
-            }
-
-            employeeList.innerHTML = html;
+        
+        function refreshData() {
+            loadData().then(() => {
+                showMessage('✅ تم تحديث البيانات', 'success', searchMessage);
+                setTimeout(() => searchMessage.innerHTML = '', 2000);
+            });
         }
-
-        function selectEmployeePhone(phone) {
-            document.getElementById('phoneNumber').value = phone;
-            handleSearch();
+        
+        function setPhoneAndSearch(phone) {
+            phoneInput.value = phone;
+            searchByPhone();
         }
-
-        function refreshEmployeeData() {
-            loadEmployeesFromDatabase();
-            showMessage('✅ تم تحديث البيانات', 'success', 'searchMessage');
-        }
-
-        // ================================================================
-        // 7️⃣ دوال رفع الملفات
-        // ================================================================
+        
+        // ==================== رفع ملف Excel ====================
         function setupFileUpload() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
-
+            
             if (!uploadArea) return;
-
+            
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#667eea';
                 uploadArea.style.background = '#edf2f7';
             });
-
+            
             uploadArea.addEventListener('dragleave', () => {
                 uploadArea.style.borderColor = '#cbd5e0';
                 uploadArea.style.background = '#f7fafc';
             });
-
+            
             uploadArea.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#cbd5e0';
                 uploadArea.style.background = '#f7fafc';
-                if (e.dataTransfer.files[0]) {
-                    await processFile(e.dataTransfer.files[0]);
-                }
+                const file = e.dataTransfer.files[0];
+                if (file) await processExcelFile(file);
             });
-
+            
             fileInput.addEventListener('change', async (e) => {
-                if (e.target.files[0]) {
-                    await processFile(e.target.files[0]);
-                }
+                if (e.target.files[0]) await processExcelFile(e.target.files[0]);
             });
         }
-
-        async function processFile(file) {
+        
+        async function processExcelFile(file) {
             if (!currentUser || currentUser.role !== 'admin') {
-                showMessage('❌ فقط المدير يمكنه رفع الملفات', 'error', 'uploadMessage');
+                showMessage('❌ فقط المدير يمكنه رفع الملفات', 'error', uploadMessage);
                 return;
             }
-
-            showMessage('📖 جاري قراءة الملف...', 'info', 'uploadMessage');
-
+            
+            showMessage('📖 جاري قراءة الملف... قد يستغرق بعض الوقت', 'info', uploadMessage);
+            
             try {
                 let jsonData;
                 const extension = file.name.split('.').pop().toLowerCase();
-
+                
                 if (extension === 'csv') {
                     const text = await file.text();
                     jsonData = parseCSV(text);
@@ -604,40 +292,36 @@
                     const worksheet = workbook.Sheets[sheetName];
                     jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false });
                 }
-
+                
                 if (!jsonData || jsonData.length === 0) {
                     throw new Error('الملف لا يحتوي على بيانات');
                 }
-
-                showMessage('📡 جاري حفظ البيانات في السحابة...', 'info', 'uploadMessage');
-                const success = await saveEmployeesToDatabase(jsonData);
-
-                if (success) {
-                    showMessage(`✅ تم رفع ${jsonData.length.toLocaleString()} موظف بنجاح! البيانات متاحة الآن لجميع المستخدمين ☁️`, 'success', 'uploadMessage');
-                    document.getElementById('phoneNumber').value = '';
-                    document.getElementById('resultContainer').innerHTML = '';
-                } else {
-                    throw new Error('فشل حفظ البيانات');
-                }
+                
+                saveData(jsonData);
+                showMessage(`✅ تم رفع ${jsonData.length.toLocaleString()} موظف بنجاح!`, 'success', uploadMessage);
+                
+                resultContainer.innerHTML = '';
+                phoneInput.value = '';
+                
             } catch (error) {
-                showMessage(`❌ خطأ: ${error.message}`, 'error', 'uploadMessage');
+                showMessage(`❌ خطأ: ${error.message}`, 'error', uploadMessage);
             }
         }
-
+        
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
             if (lines.length < 2) return [];
-
+            
             const headers = lines[0].split(',').map(h => h.replace(/["']/g, '').trim());
             const results = [];
-
+            
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
-
+                
                 const values = [];
                 let inQuote = false;
                 let current = '';
-
+                
                 for (let j = 0; j < lines[i].length; j++) {
                     const char = lines[i][j];
                     if (char === '"') {
@@ -650,7 +334,7 @@
                     }
                 }
                 values.push(current.trim().replace(/^"|"$/g, ''));
-
+                
                 if (values.length >= headers.length) {
                     const obj = {};
                     headers.forEach((h, idx) => {
@@ -663,25 +347,26 @@
             }
             return results;
         }
-
-        // ================================================================
-        // 8️⃣ دوال البحث وعرض الرواتب
-        // ================================================================
-        function handleSearch() {
-            if (employeesData.length === 0) {
-                showMessage('⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع ملف الموظفين.', 'error', 'searchMessage');
-                document.getElementById('resultContainer').innerHTML = '';
+        
+        // ==================== البحث ====================
+        phoneInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchByPhone(); });
+        
+        function searchByPhone() {
+            if (currentData.length === 0) {
+                searchMessage.innerHTML = '<div class="error-message">⚠️ لا توجد بيانات. الرجاء التواصل مع المدير لرفع ملف الموظفين.</div>';
+                resultContainer.innerHTML = '';
                 return;
             }
-
-            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            
+            const phoneNumber = phoneInput.value.trim();
             if (!phoneNumber) {
-                showMessage('⚠️ الرجاء إدخال رقم الهاتف', 'error', 'searchMessage');
-                document.getElementById('resultContainer').innerHTML = '';
+                searchMessage.innerHTML = '<div class="error-message">⚠️ الرجاء إدخال رقم الهاتف</div>';
+                resultContainer.innerHTML = '';
                 return;
             }
-
-            const employee = employeesData.find(row => {
+            
+            // البحث برقم الهاتف
+            const employee = currentData.find(row => {
                 const phone = String(row['رقم الهاتف'] || row['phone'] || '');
                 const cleanPhone = phone.replace(/[^0-9]/g, '');
                 const cleanInput = phoneNumber.replace(/[^0-9]/g, '');
@@ -689,16 +374,18 @@
                        cleanPhone === cleanInput.substring(1) ||
                        cleanPhone.substring(1) === cleanInput;
             });
-
+            
             if (!employee) {
-                showMessage(`❌ لا توجد بيانات للرقم: ${phoneNumber}`, 'error', 'searchMessage');
-                document.getElementById('resultContainer').innerHTML = '';
+                searchMessage.innerHTML = `<div class="error-message">❌ لا توجد بيانات للرقم: ${phoneNumber}</div>`;
+                resultContainer.innerHTML = '';
                 return;
             }
-
+            
+            searchMessage.innerHTML = '';
             displaySalarySlip(employee);
         }
-
+        
+        // عرض قسيمة الراتب
         function displaySalarySlip(emp) {
             const basic = parseFloat(emp['الراتب الاسمي'] || 0);
             const bonusPercent = parseFloat(emp['الحافز الاضافي'] || 0);
@@ -711,7 +398,7 @@
             const location = parseFloat(emp['الموقع'] || 0);
             const marital = parseFloat(emp['زوجية'] || 0);
             const children = parseFloat(emp['اطفال'] || 0);
-
+            
             const bonus = basic * bonusPercent;
             const hazard = basic * hazardPercent;
             const certificate = basic * certificatePercent;
@@ -720,17 +407,17 @@
             const position = basic * positionPercent;
             const engineering = basic * engineeringPercent;
             const totalAdditions = bonus + hazard + certificate + professional + exceptional + position + engineering + location + marital + children;
-
+            
             const retirement = parseFloat(emp['التقاعد'] || 0);
             const insurance = parseFloat(emp['التأمين'] || 0);
             const loans = parseFloat(emp['سلف'] || 0);
             const social = parseFloat(emp['الضمان الاجتماعي'] || 0);
             const other = parseFloat(emp['إستقطاع'] || 0);
             const totalDeductions = retirement + insurance + loans + social + other;
-
+            
             const netSalary = basic - totalDeductions + totalAdditions;
             const notes = emp['الملاحظات'] || '';
-
+            
             let additionsHtml = '';
             if (bonus > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${bonus.toLocaleString()} دينار</td></tr>`;
             if (hazard > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${hazard.toLocaleString()} دينار</td></tr>`;
@@ -742,14 +429,14 @@
             if (location > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع</td><td style="text-align:left;">${location.toLocaleString()} دينار</td></tr>`;
             if (marital > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية</td><td style="text-align:left;">${marital.toLocaleString()} دينار</td></tr>`;
             if (children > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${emp['عدد الاطفال'] || '0'} أطفال)</td><td style="text-align:left;">${children.toLocaleString()} دينار</td></tr>`;
-
+            
             let deductionsHtml = '';
             if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد</td><td style="text-align:left;">${retirement.toLocaleString()} دينار</td></tr>`;
             if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين</td><td style="text-align:left;">${insurance.toLocaleString()} دينار</td></tr>`;
             if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف</td><td style="text-align:left;">${loans.toLocaleString()} دينار</td></tr>`;
             if (social > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي</td><td style="text-align:left;">${social.toLocaleString()} دينار</td></tr>`;
             if (other > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ استقطاعات أخرى</td><td style="text-align:left;">${other.toLocaleString()} دينار</td></tr>`;
-
+            
             const html = `
                 <div class="salary-slip">
                     <div class="slip-header">
@@ -787,41 +474,80 @@
                         </div>
                         ${notes ? `<div class="notes-section"><h4>📝 ملاحظات</h4><p>${notes}</p></div>` : ''}
                     </div>
-                    <div style="background:#f7fafc; padding:15px; text-align:center;">
+                    <div class="slip-footer" style="background:#f7fafc; padding:15px; text-align:center;">
                         <p>هذا الراتب مستحق الدفع بعد خصم كافة الاستقطاعات القانونية</p>
                         <button class="btn btn-print" onclick="window.print()" style="margin-top:10px;">🖨️ طباعة القسيمة</button>
                     </div>
                 </div>
             `;
-            document.getElementById('resultContainer').innerHTML = html;
-            document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            resultContainer.innerHTML = html;
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
         }
-
-        // ================================================================
-        // 9️⃣ دالة عرض الرسائل
-        // ================================================================
-        function showMessage(msg, type, containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            const bgColor = type === 'error' ? '#fed7d7' : (type === 'success' ? '#c6f6d5' : '#e2e8f0');
-            const textColor = type === 'error' ? '#c53030' : (type === 'success' ? '#276749' : '#4a5568');
-            
+        
+        function showMessage(msg, type, container) {
+            const bgColor = type === 'error' ? '#fed7d7' : (type === 'success' ? '#c6f6d5' : (type === 'warning' ? '#feebc8' : '#e2e8f0'));
+            const textColor = type === 'error' ? '#c53030' : (type === 'success' ? '#276749' : (type === 'warning' ? '#dd6b20' : '#4a5568'));
             container.innerHTML = `<div style="background:${bgColor}; color:${textColor}; padding:12px; border-radius:10px; margin-top:10px;">${msg}</div>`;
             setTimeout(() => { if (container.innerHTML.includes(msg)) container.innerHTML = ''; }, 5000);
         }
-
-        // ================================================================
-        // 🔟 تفعيل البحث بلمسة Enter
-        // ================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('phoneNumber').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleSearch();
-            });
-        });
-
+        
+        // ==================== تسجيل الدخول ====================
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginError = document.getElementById('loginError');
+            
+            const user = users[username];
+            if (!user || user.password !== password) {
+                loginError.innerHTML = '<div class="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>';
+                return;
+            }
+            
+            currentUser = { username, role: user.role, name: user.name };
+            
+            loginContainer.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            footer.classList.remove('hidden');
+            
+            if (currentUser.role === 'admin') {
+                adminSection.classList.remove('hidden');
+                setupFileUpload();
+                userBadge.innerHTML = `👑 ${user.name} (مدير) - صلاحية كاملة`;
+            } else {
+                adminSection.classList.add('hidden');
+                userBadge.innerHTML = `👤 ${user.name} (موظف) - صلاحية البحث فقط`;
+            }
+            
+            searchSection.classList.remove('hidden');
+            
+            // تحميل البيانات
+            loadData();
+            
+            resultContainer.innerHTML = '';
+            phoneInput.value = '';
+            
+            const msg = currentUser.role === 'admin' 
+                ? 'قم برفع ملف Excel لتحديث بيانات الموظفين' 
+                : 'يمكنك البحث عن راتبك باستخدام رقم الهاتف';
+            searchMessage.innerHTML = `<div class="success-message">✅ مرحباً ${user.name}! ${msg}</div>`;
+            setTimeout(() => searchMessage.innerHTML = '', 5000);
+        }
+        
+        function logout() {
+            currentUser = null;
+            mainApp.classList.add('hidden');
+            footer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').innerHTML = '';
+            resultContainer.innerHTML = '';
+            searchMessage.innerHTML = '';
+            phoneInput.value = '';
+        }
+        
         console.log('✅ النظام جاهز للعمل!');
-        console.log('📌 البيانات مرتبطة بخادم Supabase السحابي');
+        console.log('📌 قم برفع ملف Excel الذي يحتوي على جميع بيانات الموظفين');
     </script>
 </body>
 </html>
