@@ -492,7 +492,7 @@
         }
         
         // ==================== تسجيل الدخول ====================
-        function login() {
+        async function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
@@ -519,12 +519,12 @@
             }
             
             searchSection.classList.remove('hidden');
-            
-            // تحميل البيانات
-            loadData();
-            
             resultContainer.innerHTML = '';
             phoneInput.value = '';
+            
+            // انتظار تحميل البيانات قبل إظهار الرسالة
+            dataStatus.innerHTML = '⏳ جاري تحميل البيانات...';
+            await loadData();
             
             const msg = currentUser.role === 'admin' 
                 ? 'قم برفع ملف Excel لتحديث بيانات الموظفين' 
