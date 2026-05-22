@@ -8,7 +8,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 950px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         
         .login-container { background: white; border-radius: 25px; padding: 40px; max-width: 400px; margin: 50px auto; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .login-container h2 { color: #4a5568; margin-bottom: 20px; }
@@ -60,9 +60,11 @@
         .info-message { background: #e2e8f0; color: #4a5568; padding: 12px; border-radius: 10px; text-align: center; }
         .warning-message { background: #feebc8; color: #dd6b20; padding: 12px; border-radius: 10px; text-align: center; }
         
-        .google-config { background: #ebf8ff; border: 1px solid #90cdf4; border-radius: 12px; padding: 15px; margin-top: 15px; text-align: right; }
-        .google-config input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 13px; }
-        .google-config a { color: #4285f4; }
+        .google-config { background: #ebf8ff; border: 2px solid #90cdf4; border-radius: 12px; padding: 20px; margin-top: 15px; }
+        .google-config h4 { color: #2b6cb0; margin-bottom: 15px; }
+        .google-config input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 13px; direction: ltr; }
+        .google-config textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 12px; font-family: monospace; direction: ltr; background: #f7fafc; }
+        .google-config .step { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; border-right: 3px solid #4285f4; }
         
         .employee-list { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; }
         .employee-item { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; }
@@ -71,7 +73,7 @@
         footer { text-align: center; color: white; margin-top: 20px; font-size: 12px; }
         
         @media print { .upload-section, .search-section, .btn, .logout-btn, .user-badge, .data-status { display: none; } }
-        @media (max-width: 768px) { .logout-btn, .user-badge { position: static; display: inline-block; margin: 5px; } .header { padding-top: 50px; } .employee-item { flex-direction: column; gap: 5px; } }
+        @media (max-width: 768px) { .logout-btn, .user-badge { position: static; display: inline-block; margin: 5px; } .header { padding-top: 50px; } }
     </style>
 </head>
 <body>
@@ -87,8 +89,8 @@
                 <p>👑 <strong>مدير النظام</strong>: admin / aksaka</p>
                 <p>👤 <strong>موظف</strong>: user / user123</p>
                 <hr>
-                <p style="color:#48bb78;">✅ البيانات من Google Sheets - تعمل على جميع الأجهزة</p>
-                <p style="color:#ed8936;">📌 بعد ربط Google Sheets، جميع المستخدمين يرون نفس البيانات</p>
+                <p style="color:#48bb78;">✅ بيانات حية من Google Sheets - تعمل على جميع الأجهزة</p>
+                <p style="color:#ed8936;">📌 بعد ربط الجدول، جميع المستخدمين يرون نفس البيانات</p>
             </div>
         </div>
         
@@ -97,8 +99,8 @@
                 <button class="logout-btn" onclick="logout()">🚪 تسجيل خروج</button>
                 <div class="user-badge" id="userBadge"></div>
                 <h1>🏭 نظام إدارة رواتب الموظفين</h1>
-                <p>محطة شط البصرة</p>
-                <div class="data-status" id="dataStatus" onclick="loadFromGoogleSheets()">📊 جاري التحميل...</div>
+                <p>محطة شط البصرة - إدارة الموارد البشرية</p>
+                <div class="data-status" id="dataStatus" onclick="refreshData()">📊 جاري التحميل...</div>
             </div>
             
             <!-- قسم المدير فقط -->
@@ -107,19 +109,31 @@
                 
                 <!-- ربط Google Sheets -->
                 <div class="google-config">
-                    <h4 style="margin-bottom: 10px;">🔗 ربط Google Sheets (حل سحابي مجاني)</h4>
-                    <p style="font-size: 12px; margin-bottom: 10px;"><strong>طريقة الإعداد (مرة واحدة):</strong></p>
-                    <ol style="font-size: 11px; margin-right: 20px; line-height: 1.6;">
-                        <li>افتح <a href="https://sheets.new" target="_blank">Google Sheets جديدة</a></li>
-                        <li>أضف بيانات الموظفين (الأعمدة: <strong>رقم الهاتف</strong>, <strong>الاسم</strong>, <strong>الراتب الاسمي</strong>, <strong>القسم</strong>, <strong>الحافز الاضافي</strong>, <strong>خطورة</strong>, <strong>الشهادة</strong>, <strong>الموقع</strong>, <strong>زوجية</strong>, <strong>اطفال</strong>, <strong>التقاعد</strong>, <strong>التأمين</strong>)</li>
-                        <li>اضغط <strong>مشاركة</strong> → <strong>تغيير</strong> → <strong>أي شخص لديه الرابط</strong> (عرض فقط)</li>
-                        <li>انسخ الرابط بالكامل والصقه أدناه</li>
-                    </ol>
-                    <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/XXXXXXXXXXXX/edit" style="width:100%; padding:10px; margin:10px 0;">
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-google" onclick="saveAndLoadSheet()">💾 حفظ وجلب البيانات</button>
-                        <button class="btn btn-google" onclick="loadFromGoogleSheets()">🔄 تحديث من Google Sheets</button>
+                    <h4>🔗 ربط Google Sheets (تخزين سحابي مجاني)</h4>
+                    
+                    <div class="step">
+                        <strong>📖 الخطوة 1: إنشاء جدول البيانات</strong>
+                        <p style="font-size: 12px; margin-top: 5px;">افتح <a href="https://sheets.new" target="_blank">https://sheets.new</a> وأنشئ جدولاً بالأعمدة التالية:</p>
+                        <code style="background: #e2e8f0; padding: 8px; display: block; font-size: 11px; margin: 10px 0; overflow-x: auto;">
+                            رقم الهاتف | الاسم | الراتب الاسمي | القسم | العنوان الوظيفي | الحافز الاضافي | خطورة | الشهادة | مهنية | الموقع | زوجية | اطفال | التقاعد | التأمين | الملاحظات
+                        </code>
                     </div>
+                    
+                    <div class="step">
+                        <strong>📖 الخطوة 2: جعل الجدول عاماً</strong>
+                        <p style="font-size: 12px; margin-top: 5px;">اضغط زر <strong>مشاركة</strong> → <strong>تغيير</strong> → <strong>أي شخص لديه الرابط</strong> → <strong>مشاهد</strong> → <strong>حفظ</strong></p>
+                    </div>
+                    
+                    <div class="step">
+                        <strong>📖 الخطوة 3: نشر الجدول كـ CSV</strong>
+                        <p style="font-size: 12px; margin-top: 5px;">اذهب إلى <strong>ملف → مشاركة → نشر على الويب</strong> → اختر <strong>ورقة1</strong> و <strong>CSV</strong> → انشر → انسخ الرابط</p>
+                    </div>
+                    
+                    <input type="text" id="csvUrl" placeholder="الصق رابط CSV المنشور هنا" style="width:100%; padding:12px; margin:10px 0;">
+                    <button class="btn btn-google" onclick="connectGoogleSheet()">✅ ربط الجدول وجلب البيانات</button>
+                    <button class="btn" onclick="refreshFromGoogle()">🔄 تحديث من Google Sheets</button>
+                    
+                    <div id="sheetStatus" class="info-message" style="margin-top: 10px; font-size: 12px; display: none;"></div>
                 </div>
                 
                 <hr style="margin: 20px 0;">
@@ -142,10 +156,6 @@
                 <div id="employeeListContainer" class="employee-list hidden">
                     <div style="background: #f7fafc; padding: 10px; font-weight: bold;">📋 قائمة الموظفين</div>
                     <div id="employeeList"></div>
-                </div>
-                
-                <div class="info-message" style="margin-top: 15px; font-size: 12px;">
-                    💡 <strong>ملاحظة:</strong> بعد ربط Google Sheets، جميع الموظفين سيرون نفس البيانات مباشرة من السحابة!
                 </div>
             </div>
             
@@ -171,7 +181,7 @@
         // ==================== البيانات والمتغيرات ====================
         let currentData = [];
         let currentUser = null;
-        let sheetId = localStorage.getItem('google_sheet_id') || '';
+        let googleCsvUrl = localStorage.getItem('google_csv_url') || '';
         
         // ==================== بيانات نموذجية ====================
         const DEMO_DATA = [
@@ -198,47 +208,49 @@
         const employeeListContainer = document.getElementById('employeeListContainer');
         const employeeList = document.getElementById('employeeList');
         const employeeCount = document.getElementById('employeeCount');
-        const sheetUrlInput = document.getElementById('sheetUrl');
+        const csvUrlInput = document.getElementById('csvUrl');
+        const sheetStatus = document.getElementById('sheetStatus');
         
         // ==================== وظائف Google Sheets ====================
         
-        function saveAndLoadSheet() {
-            const url = sheetUrlInput.value.trim();
+        function connectGoogleSheet() {
+            const url = csvUrlInput.value.trim();
             if (!url) {
-                showMessage('⚠️ الرجاء إدخال رابط Google Sheet', 'error', uploadMessage);
+                showMessage('⚠️ الرجاء إدخال رابط CSV المنشور', 'error', uploadMessage);
                 return;
             }
             
-            // استخراج المعرف من الرابط
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (!match) {
-                showMessage('❌ رابط غير صحيح. تأكد من نسخ الرابط كاملاً', 'error', uploadMessage);
+            // التحقق من الرابط
+            if (!url.includes('google.com') && !url.includes('docs.google.com')) {
+                showMessage('❌ الرابط غير صالح. تأكد من نسخ رابط النشر من Google Sheets', 'error', uploadMessage);
                 return;
             }
             
-            sheetId = match[1];
-            localStorage.setItem('google_sheet_id', sheetId);
-            showMessage('✅ تم حفظ معرف الجدول! جاري تحميل البيانات...', 'success', uploadMessage);
+            googleCsvUrl = url;
+            localStorage.setItem('google_csv_url', googleCsvUrl);
+            showMessage('✅ تم حفظ الرابط! جاري تحميل البيانات...', 'success', uploadMessage);
             loadFromGoogleSheets();
         }
         
         async function loadFromGoogleSheets() {
-            if (!sheetId) {
+            if (!googleCsvUrl) {
                 if (currentUser?.role === 'admin') {
-                    showMessage('⚠️ الرجاء إدخال رابط Google Sheets أولاً', 'warning', searchMessage);
+                    showMessage('⚠️ الرجاء إدخال رابط CSV المنشور أولاً', 'warning', searchMessage);
                 }
                 return false;
             }
             
             showMessage('☁️ جاري تحميل البيانات من Google Sheets...', 'info', searchMessage);
-            dataStatus.innerHTML = '⏳ جاري التحميل من السحابة...';
+            dataStatus.innerHTML = '⏳ جاري التحميل...';
             
             try {
-                // استخدام CSV export (أسهل طريقة)
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
-                const response = await fetch(csvUrl, { cache: 'no-store' });
+                // إضافة معلمة عشوائية لمنع الكاش
+                const urlWithCache = googleCsvUrl + (googleCsvUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
+                const response = await fetch(urlWithCache);
                 
-                if (!response.ok) throw new Error('فشل في التحميل');
+                if (!response.ok) {
+                    throw new Error('فشل في تحميل الملف');
+                }
                 
                 const csvText = await response.text();
                 const employees = parseCSVToJSON(csvText);
@@ -249,16 +261,46 @@
                     updateUI();
                     showMessage(`✅ تم تحميل ${currentData.length} موظف من Google Sheets!`, 'success', searchMessage);
                     updateDataStatus(currentData.length, true);
+                    if (sheetStatus) {
+                        sheetStatus.style.display = 'block';
+                        sheetStatus.innerHTML = `✅ متصل بـ Google Sheets - ${currentData.length} موظف`;
+                        sheetStatus.className = 'success-message';
+                        setTimeout(() => sheetStatus.style.display = 'none', 3000);
+                    }
                     return true;
                 } else {
-                    throw new Error('لا توجد بيانات');
+                    throw new Error('لا توجد بيانات في الجدول');
                 }
             } catch (error) {
-                console.error(error);
+                console.error('خطأ في التحميل:', error);
                 dataStatus.innerHTML = '⚠️ فشل الاتصال';
+                showMessage(`❌ خطأ: تأكد من نشر الجدول كـ CSV وأن الرابط صحيح`, 'error', searchMessage);
+                if (sheetStatus) {
+                    sheetStatus.style.display = 'block';
+                    sheetStatus.innerHTML = `❌ فشل الاتصال: ${error.message}`;
+                    sheetStatus.className = 'error-message';
+                }
                 // استخدام البيانات المحفوظة كنسخة احتياطية
                 loadBackupData();
                 return false;
+            }
+        }
+        
+        function refreshFromGoogle() {
+            if (googleCsvUrl) {
+                loadFromGoogleSheets();
+            } else {
+                showMessage('⚠️ الرجاء إدخال رابط Google Sheets أولاً', 'warning', searchMessage);
+            }
+        }
+        
+        function refreshData() {
+            if (googleCsvUrl) {
+                loadFromGoogleSheets();
+            } else {
+                loadBackupData();
+                showMessage('✅ تم تحديث البيانات المحلية', 'success', searchMessage);
+                setTimeout(() => searchMessage.innerHTML = '', 2000);
             }
         }
         
@@ -266,12 +308,14 @@
             const lines = csvText.split(/\r?\n/);
             if (lines.length < 2) return [];
             
-            const headers = lines[0].split(',').map(h => h.replace(/["']/g, '').trim());
-            const results = [];
+            // معالجة العناوين
+            let headers = lines[0].split(',').map(h => h.replace(/["']/g, '').trim());
             
+            const results = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
                 
+                // معالجة CSV بشكل صحيح مع الحقول بين علامات التنصيص
                 const values = [];
                 let inQuote = false;
                 let current = '';
@@ -293,7 +337,10 @@
                     const obj = {};
                     headers.forEach((h, idx) => {
                         let val = values[idx] || '';
-                        if (!isNaN(val) && val !== '') val = parseFloat(val);
+                        // محاولة تحويل الأرقام
+                        if (!isNaN(val) && val !== '') {
+                            val = parseFloat(val);
+                        }
                         obj[h] = val;
                     });
                     results.push(obj);
@@ -348,7 +395,7 @@
         function updateDataStatus(count, isCloud) {
             if (dataStatus) {
                 const icon = isCloud ? '☁️' : '📁';
-                dataStatus.innerHTML = `${icon} ${count.toLocaleString()} موظف | اضغط للتحديث`;
+                dataStatus.innerHTML = `${icon} ${count.toLocaleString()} موظف`;
                 dataStatus.style.background = isCloud ? '#4299e1' : '#48bb78';
             }
         }
@@ -491,19 +538,19 @@
             const notes = emp['الملاحظات'] || '';
             
             let additionsHtml = '';
-            if (bonus > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td>${bonus.toLocaleString()} دينار</td></td>`;
-            if (hazard > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td>${hazard.toLocaleString()} دينار</td></tr>`;
-            if (certificate > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)</td><td>${certificate.toLocaleString()} دينار</td></tr>`;
-            if (professional > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)</td><td>${professional.toLocaleString()} دينار</td></tr>`;
-            if (location > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع</td><td>${location.toLocaleString()} دينار</td></tr>`;
-            if (marital > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية</td><td>${marital.toLocaleString()} دينار</td></tr>`;
-            if (children > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${emp['عدد الاطفال'] || '0'} أطفال)</td><td>${children.toLocaleString()} دينار</td></tr>`;
+            if (bonus > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ الحافز الإضافي (${(bonusPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${bonus.toLocaleString()} دينار</td></tr>`;
+            if (hazard > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل خطورة (${(hazardPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${hazard.toLocaleString()} دينار</td></tr>`;
+            if (certificate > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ بدل شهادة (${(certificatePercent*100).toFixed(1)}%)</td><td style="text-align:left;">${certificate.toLocaleString()} دينار</td></tr>`;
+            if (professional > 0) additionsHtml += `<tr><td style="padding-right:20px;">✓ مهنية (${(professionalPercent*100).toFixed(1)}%)</td><td style="text-align:left;">${professional.toLocaleString()} دينار</td></tr>`;
+            if (location > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل موقع</td><td style="text-align:left;">${location.toLocaleString()} دينار</td></tr>`;
+            if (marital > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل زوجية</td><td style="text-align:left;">${marital.toLocaleString()} دينار</td></tr>`;
+            if (children > 0) additionsHtml += `<tr style="background:#e6f7ff;"><td style="padding-right:20px;">✓ بدل أطفال (${emp['عدد الاطفال'] || '0'} أطفال)</td><td style="text-align:left;">${children.toLocaleString()} دينار</td></tr>`;
             
             let deductionsHtml = '';
-            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد</td><td>${retirement.toLocaleString()} دينار</td></tr>`;
-            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين</td><td>${insurance.toLocaleString()} دينار</td></tr>`;
-            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف</td><td>${loans.toLocaleString()} دينار</td></tr>`;
-            if (social > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي</td><td>${social.toLocaleString()} دينار</td></tr>`;
+            if (retirement > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التقاعد</td><td style="text-align:left;">${retirement.toLocaleString()} دينار</td></tr>`;
+            if (insurance > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ التأمين</td><td style="text-align:left;">${insurance.toLocaleString()} دينار</td></tr>`;
+            if (loans > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ سلف</td><td style="text-align:left;">${loans.toLocaleString()} دينار</td></tr>`;
+            if (social > 0) deductionsHtml += `<tr><td style="padding-right:20px;">✓ الضمان الاجتماعي</td><td style="text-align:left;">${social.toLocaleString()} دينار</td></tr>`;
             
             const html = `
                 <div class="salary-slip">
@@ -525,15 +572,15 @@
                         </div>
                         <div style="margin-top:20px;">
                             <h3>💰 تفاصيل الراتب</h3>
-                            <table class="salary-table">
-                                <tr style="background:#f0f0f0;"><td><strong>الراتب الأساسي</strong></td><td><strong>${basic.toLocaleString()} دينار</strong></td></tr>
-                                <tr style="background:#f7fafc;"><td colspan="2"><strong>➕ الإضافات</strong></td></tr>
-                                ${additionsHtml || '<tr><td colspan="2" style="color:#718096;">لا توجد إضافات</td></tr>'}
-                                <tr><td><strong>مجموع الإضافات</strong></td><td><strong>${totalAdditions.toLocaleString()} دينار</strong></td></tr>
-                                <tr style="background:#f7fafc;"><td colspan="2"><strong>➖ الاستقطاعات</strong></td></tr>
-                                ${deductionsHtml || '<tr><td colspan="2" style="color:#718096;">لا توجد استقطاعات</td></tr>'}
-                                <tr><td><strong>مجموع الاستقطاعات</strong></td><td style="color:#e53e3e;"><strong>${totalDeductions.toLocaleString()} دينار</strong></td></tr>
-                                <tr class="total-row"><td style="font-size:18px;"><strong>صافي الراتب المستحق</strong></td><td style="font-size:22px; color:#48bb78;"><strong>${netSalary.toLocaleString()} دينار</strong></td></tr>
+                            <table class="salary-table" style="width:100%; border-collapse:collapse;">
+                                <tr style="background:#f0f0f0;"><td style="padding:10px;"><strong>الراتب الأساسي</strong></td><td style="padding:10px; text-align:left;"><strong>${basic.toLocaleString()} دينار</strong></td></tr>
+                                <tr style="background:#f7fafc;"><td colspan="2" style="padding:10px;"><strong>➕ الإضافات</strong></td></tr>
+                                ${additionsHtml || '<tr><td colspan="2" style="padding:10px; color:#718096;">لا توجد إضافات</td></tr>'}
+                                <tr><td style="padding:10px;"><strong>مجموع الإضافات</strong></td><td style="padding:10px; text-align:left;"><strong>${totalAdditions.toLocaleString()} دينار</strong></td></tr>
+                                <tr style="background:#f7fafc;"><td colspan="2" style="padding:10px;"><strong>➖ الاستقطاعات</strong></td></tr>
+                                ${deductionsHtml || '<tr><td colspan="2" style="padding:10px; color:#718096;">لا توجد استقطاعات</td></tr>'}
+                                <tr><td style="padding:10px;"><strong>مجموع الاستقطاعات</strong></td><td style="padding:10px; text-align:left; color:#e53e3e;"><strong>${totalDeductions.toLocaleString()} دينار</strong></td></tr>
+                                <tr class="total-row"><td style="padding:15px; font-size:18px;"><strong>صافي الراتب المستحق</strong></td><td style="padding:15px; font-size:22px; color:#48bb78; text-align:left;"><strong>${netSalary.toLocaleString()} دينار</strong></td></tr>
                             </table>
                         </div>
                         ${notes ? `<div class="notes-section"><h4>📝 ملاحظات</h4><p>${notes}</p></div>` : ''}
@@ -582,8 +629,8 @@
                 adminSection.classList.remove('hidden');
                 setupFileUpload();
                 userBadge.innerHTML = `👑 ${user.name} (مدير) - صلاحية كاملة`;
-                if (sheetId) {
-                    sheetUrlInput.value = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+                if (googleCsvUrl) {
+                    csvUrlInput.value = googleCsvUrl;
                 }
             } else {
                 adminSection.classList.add('hidden');
@@ -593,7 +640,7 @@
             searchSection.classList.remove('hidden');
             
             // تحميل البيانات
-            if (sheetId) {
+            if (googleCsvUrl) {
                 loadFromGoogleSheets();
             } else {
                 loadBackupData();
@@ -623,9 +670,11 @@
         }
         
         console.log('✅ النظام جاهز!');
-        console.log('📌 الحل النهائي: استخدام Google Sheets كمصدر بيانات سحابي');
-        console.log('👑 المدير: يربط Google Sheets مرة واحدة فقط');
-        console.log('👤 جميع المستخدمين: يقرؤون نفس البيانات من السحابة');
+        console.log('📌 طريقة ربط Google Sheets:');
+        console.log('1. افتح sheets.new');
+        console.log('2. أضف بيانات الموظفين');
+        console.log('3. ملف → مشاركة → نشر على الويب → CSV');
+        console.log('4. انسخ الرابط والصقه في النظام');
     </script>
 </body>
 </html>
