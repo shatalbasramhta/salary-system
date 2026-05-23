@@ -99,84 +99,7 @@
             <div id="adminSection" class="upload-section hidden">
                 <h3 style="margin-bottom: 15px; text-align:center;">👑 لوحة تحكم المدير</h3>
 
-                <!-- Google Sheets ربط -->
-                <div style="background:#f0fff4; border:2px solid #48bb78; border-radius:15px; padding:20px; margin-bottom:20px;">
-                    <h4 style="color:#276749; margin-bottom:12px;">🔗 ربط Google Sheets</h4>
 
-                    <!-- تبويبات -->
-                    <div style="display:flex; gap:8px; margin-bottom:15px;">
-                        <button onclick="switchTab('apps')" id="tabApps"
-                            style="flex:1; padding:8px; border-radius:8px; border:2px solid #48bb78; background:#48bb78; color:white; cursor:pointer; font-size:13px; font-weight:bold;">
-                            ⚡ Apps Script (مُوصى به)
-                        </button>
-                        <button onclick="switchTab('csv')" id="tabCsv"
-                            style="flex:1; padding:8px; border-radius:8px; border:2px solid #cbd5e0; background:white; color:#4a5568; cursor:pointer; font-size:13px;">
-                            📄 رابط CSV مباشر
-                        </button>
-                    </div>
-
-                    <!-- تبويب Apps Script -->
-                    <div id="panelApps">
-                        <p style="font-size:13px; color:#4a5568; margin-bottom:10px;">
-                            أنشئ Apps Script في الشيت كـ proxy — يعمل دائماً بدون قيود.
-                        </p>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec"
-                                style="flex:1; min-width:200px; padding:10px; border:2px solid #c6f6d5; border-radius:10px; font-size:13px; direction:ltr;">
-                            <button class="btn" style="background:#48bb78;" onclick="fetchFromAppsScript()">📥 جلب البيانات</button>
-                        </div>
-                        <details style="margin-top:12px;">
-                            <summary style="cursor:pointer; font-size:12px; color:#667eea; font-weight:bold;">📖 كيف أنشئ Apps Script؟</summary>
-                            <ol style="font-size:12px; color:#4a5568; margin-top:8px; padding-right:20px; line-height:2.2;">
-                                <li>افتح Google Sheets ← <strong>الإضافات ← Apps Script</strong></li>
-                                <li>احذف الكود الموجود والصق هذا:
-                                    <div style="background:#1a202c; color:#68d391; padding:10px; border-radius:8px; margin:6px 0; direction:ltr; font-size:11px; font-family:monospace; white-space:pre-wrap;">function doGet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getActiveSheet();
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0];
-  const rows = data.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i]);
-    return obj;
-  });
-  return ContentService
-    .createTextOutput(JSON.stringify(rows))
-    .setMimeType(ContentService.MimeType.JSON);
-}</div>
-                                </li>
-                                <li>اضغط <strong>نشر ← نشر جديد</strong></li>
-                                <li>النوع: <strong>تطبيق ويب</strong> ← التنفيذ كـ: <strong>أنا</strong> ← الوصول: <strong>أي شخص</strong></li>
-                                <li>اضغط <strong>نشر</strong> ← انسخ الرابط والصقه أعلاه</li>
-                            </ol>
-                        </details>
-                    </div>
-
-                    <!-- تبويب CSV -->
-                    <div id="panelCsv" style="display:none;">
-                        <p style="font-size:13px; color:#4a5568; margin-bottom:10px;">
-                            انشر الشيت كـ CSV وألصق الرابط — قد لا يعمل في بعض الشبكات.
-                        </p>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
-                                style="flex:1; min-width:200px; padding:10px; border:2px solid #c6f6d5; border-radius:10px; font-size:13px; direction:ltr;">
-                            <button class="btn" style="background:#48bb78;" onclick="fetchFromSheets()">📥 جلب البيانات</button>
-                        </div>
-                        <details style="margin-top:12px;">
-                            <summary style="cursor:pointer; font-size:12px; color:#667eea; font-weight:bold;">📖 كيف أحصل على رابط CSV؟</summary>
-                            <ol style="font-size:12px; color:#4a5568; margin-top:8px; padding-right:20px; line-height:2;">
-                                <li>ملف ← مشاركة ← نشر على الويب</li>
-                                <li>اختر الورقة ← <strong>CSV</strong> ← نشر</li>
-                                <li>انسخ الرابط والصقه أعلاه</li>
-                            </ol>
-                        </details>
-                    </div>
-
-                    <div id="sheetsStatus" style="margin-top:10px; font-size:13px;"></div>
-                </div>
-
-                <!-- فاصل -->
-                <div style="text-align:center; color:#a0aec0; margin:10px 0; font-size:13px;">─── أو رفع ملف يدوياً ───</div>
 
                 <div class="upload-area" id="uploadArea">
                     <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
@@ -230,7 +153,6 @@
         let currentData = [];
         let currentUser = null;
         const STORAGE_KEY = 'salary_system_master_data';
-        const SHEETS_URL_KEY = 'salary_system_sheets_url';
         
         // ==================== عناصر DOM ====================
         const loginContainer = document.getElementById('loginContainer');
@@ -349,103 +271,6 @@
         }
         
         // ==================== Google Sheets ====================
-
-        function switchTab(tab) {
-            document.getElementById('panelApps').style.display = tab === 'apps' ? 'block' : 'none';
-            document.getElementById('panelCsv').style.display  = tab === 'csv'  ? 'block' : 'none';
-            document.getElementById('tabApps').style.background = tab === 'apps' ? '#48bb78' : 'white';
-            document.getElementById('tabApps').style.color      = tab === 'apps' ? 'white'   : '#4a5568';
-            document.getElementById('tabApps').style.borderColor= tab === 'apps' ? '#48bb78' : '#cbd5e0';
-            document.getElementById('tabCsv').style.background  = tab === 'csv'  ? '#48bb78' : 'white';
-            document.getElementById('tabCsv').style.color       = tab === 'csv'  ? 'white'   : '#4a5568';
-            document.getElementById('tabCsv').style.borderColor = tab === 'csv'  ? '#48bb78' : '#cbd5e0';
-        }
-
-        async function fetchFromAppsScript() {
-            const urlInput = document.getElementById('appsScriptUrl');
-            const sheetsStatus = document.getElementById('sheetsStatus');
-            const url = urlInput.value.trim();
-
-            if (!url) {
-                sheetsStatus.innerHTML = '<span style="color:#c53030;">⚠️ الرجاء إدخال رابط Apps Script</span>';
-                return;
-            }
-
-            sheetsStatus.innerHTML = '<span style="color:#667eea;">⏳ جاري جلب البيانات...</span>';
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const jsonData = await response.json();
-
-                if (!Array.isArray(jsonData) || jsonData.length === 0)
-                    throw new Error('لا توجد بيانات في الشيت');
-
-                await window.storage.set(SHEETS_URL_KEY, url, true).catch(() => {});
-                await saveData(jsonData);
-                sheetsStatus.innerHTML = '<span style="color:#276749;">✅ تم جلب ' + jsonData.length.toLocaleString() + ' موظف بنجاح!</span>';
-                setTimeout(() => { sheetsStatus.innerHTML = ''; }, 6000);
-            } catch(e) {
-                sheetsStatus.innerHTML = '<div style="background:#fed7d7;color:#c53030;padding:12px;border-radius:10px;font-size:13px;">❌ خطأ: ' + e.message + '<br>تأكد أن الوصول مضبوط على <strong>أي شخص</strong> عند النشر.</div>';
-            }
-        }
-
-        async function fetchFromSheets() {
-            const urlInput = document.getElementById('sheetsUrl');
-            const sheetsStatus = document.getElementById('sheetsStatus');
-            let url = urlInput.value.trim();
-
-            if (!url) {
-                sheetsStatus.innerHTML = '<span style="color:#c53030;">⚠️ الرجاء إدخال رابط CSV</span>';
-                return;
-            }
-
-            const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-            if (match) {
-                const gidMatch = url.match(/[?&]gid=(\d+)/);
-                const gid = gidMatch ? '&gid=' + gidMatch[1] : '';
-                url = 'https://docs.google.com/spreadsheets/d/' + match[1] + '/pub?output=csv' + gid;
-                urlInput.value = url;
-            }
-
-            sheetsStatus.innerHTML = '<span style="color:#667eea;">⏳ جاري جلب البيانات...</span>';
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const text = await response.text();
-                if (text.trim().startsWith('<') && text.includes('<!DOCTYPE'))
-                    throw new Error('الرابط غير منشور بشكل عام');
-                const jsonData = parseCSV(text);
-                if (!jsonData || jsonData.length === 0) throw new Error('الشيت لا يحتوي على بيانات');
-
-                await window.storage.set(SHEETS_URL_KEY, url, true).catch(() => {});
-                await saveData(jsonData);
-                sheetsStatus.innerHTML = '<span style="color:#276749;">✅ تم جلب ' + jsonData.length.toLocaleString() + ' موظف بنجاح!</span>';
-                setTimeout(() => { sheetsStatus.innerHTML = ''; }, 6000);
-            } catch(e) {
-                sheetsStatus.innerHTML = '<div style="background:#fed7d7;color:#c53030;padding:12px;border-radius:10px;font-size:13px;">❌ ' + e.message + '</div>';
-            }
-        }
-
-                async function loadSavedSheetsUrl() {
-            try {
-                const result = await window.storage.get(SHEETS_URL_KEY, true);
-                if (result && result.value) {
-                    const url = result.value;
-                    // تحديد التبويب المناسب بناءً على الرابط المحفوظ
-                    if (url.includes('script.google.com')) {
-                        const input = document.getElementById('appsScriptUrl');
-                        if (input) input.value = url;
-                        switchTab('apps');
-                    } else {
-                        const input = document.getElementById('sheetsUrl');
-                        if (input) input.value = url;
-                        switchTab('csv');
-                    }
-                }
-            } catch(e) {}
-        }
 
         // ==================== رفع ملف Excel ====================
         function setupFileUpload() {
@@ -740,7 +565,6 @@
             if (currentUser.role === 'admin') {
                 adminSection.classList.remove('hidden');
                 setupFileUpload();
-                loadSavedSheetsUrl();
                 userBadge.innerHTML = `👑 ${user.name} (مدير) - صلاحية كاملة`;
             } else {
                 adminSection.classList.add('hidden');
